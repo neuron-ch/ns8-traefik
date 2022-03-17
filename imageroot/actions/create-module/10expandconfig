@@ -27,6 +27,7 @@ exec 1>&2
 
 LE_EMAIL=${LE_EMAIL:-root@$(hostname -f)}
 LOG_LEVEL=${LOG_LEVEL:-INFO}
+ACME_SERVER_URL=${ACME_SERVER_URL:-https://acme-v02.api.letsencrypt.org/directory}
 
 cat >traefik.yaml <<EOF 
 defaultEntryPoints:
@@ -53,13 +54,14 @@ providers:
       - "127.0.0.1:6379"
 
 tls:
-  certResolver: letsencrypt
+  certResolver: acmeServer
   options: {}
 
 certificatesResolvers:
-  letsencrypt:
+  acmeServer:
     acme:
       email: ${LE_EMAIL}
+      caServer: ${ACME_SERVER_URL}
       storage: /etc/traefik/acme/acme.json
       httpChallenge:
         entryPoint: http

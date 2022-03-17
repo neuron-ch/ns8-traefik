@@ -89,7 +89,7 @@ r.set(f'{router_s}/service', data["instance"])
 # Enable or disable Let's Encrypt certificate
 if data.get("host") is not None:
     if data["lets_encrypt"]:
-        r.set(f'{router_s}/tls/certresolver', "letsencrypt")
+        r.set(f'{router_s}/tls/certresolver', "acmeServer")
     else:
         r.delete(f'{router_s}/tls/certresolver')
 
