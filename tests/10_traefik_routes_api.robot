@@ -54,6 +54,5 @@ Delete routes
     Run task    module/traefik1/delete-route   	 {"instance": "module3"}
 
 Get Empty routes list
-    Sleep    20s
     ${response} =  Run task    module/traefik1/list-routes    {}
     Should Be Empty    ${response}

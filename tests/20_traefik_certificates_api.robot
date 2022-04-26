@@ -20,6 +20,5 @@ Delete certificate
     Run task    module/traefik1/delete-certificate   	 {"fqdn": "example.com"}
 
 Get empty certificates list
-    Sleep    10s
     ${response} =  Run task    module/traefik1/list-certificates    {}
     Should Be Empty    ${response}
