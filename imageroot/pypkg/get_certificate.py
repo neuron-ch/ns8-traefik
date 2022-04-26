@@ -40,16 +40,15 @@ def get_certificate(data):
         if traefik_https_route['status'] == 'disabled':
             return {}
 
-        # Open the certificates storage file
-        with open(f'/home/{moduleid}/.local/share/containers/storage/volumes/traefik-acme/_data/acme.json') as f:
-            acme_storage = json.load(f)
-
         certificate['fqdn'] = fqdn
 
         certificate['obtained'] = False
 
-        resolver = traefik_https_route['tls']['certResolver']
+        # Open the certificates storage file
+        with open(f'/home/{moduleid}/.local/share/containers/storage/volumes/traefik-acme/_data/acme.json') as f:
+            acme_storage = json.load(f)
 
+        resolver = traefik_https_route['tls']['certResolver']
         certificates = acme_storage[resolver].get('Certificates')
 
         # Check if the certificate is present in the storage
@@ -65,5 +64,9 @@ def get_certificate(data):
 
     except urllib.error.URLError as e:
         raise Exception(f'Error reaching traefik daemon: {e.reason}') from e
+
+    except json.decoder.JSONDecodeError:
+            # The acme storage is empty or corrupted, return the certificate as requested but not obtained
+            pass
 
     return certificate
