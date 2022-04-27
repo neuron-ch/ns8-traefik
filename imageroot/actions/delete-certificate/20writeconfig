@@ -41,7 +41,7 @@ if not agent_id:
     raise Exception("AGENT_ID not found inside the environemnt")
 
 # Connect to redis
-rdb = agent.redis_connect(privileged=True)
+rdb = agent.redis_connect(privileged=True).pipeline()
 
 # Prepare common key prefix
 router=f'{agent_id}/kv/http/routers/certificate-{data["fqdn"]}'
@@ -54,6 +54,9 @@ rdb.delete(f'{router}/service')
 rdb.delete(f'{router}/tls')
 rdb.delete(f'{router}/tls/domains/0/main')
 rdb.delete(f'{router}/tls/certresolver')
+
+# Write the configuration on redis
+rdb.execute()
 
 # Output valid JSON
 print("true")

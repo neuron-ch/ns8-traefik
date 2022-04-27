@@ -41,7 +41,7 @@ if not agent_id:
     raise Exception("AGENT_ID not found inside the environemnt")
 
 # Connect to redis
-r = agent.redis_connect(privileged=True)
+r = agent.redis_connect(privileged=True).pipeline()
 
 # Prepare common key prefix
 prefix=f'{agent_id}/kv/http'
@@ -66,3 +66,6 @@ r.delete(f'{router}/middlewares/0')
 r.delete(f'{router}/middlewares/1')
 r.delete(f'{router_s}/middlewares/1')
 r.delete(f'{middlewares}/{data["instance"]}-stripprefix/stripPrefix/prefixes/0')
+
+# Write the configuration on redis
+r.execute()
