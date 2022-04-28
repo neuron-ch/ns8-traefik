@@ -3,6 +3,15 @@ Library    SSHLibrary
 Resource          api.resource
 
 *** Test Cases ***
+
+Set ACME server url to Let's Encrypt Staging
+    ${response} =  Run task    module/traefik1/set-acme-server
+    ...    {"url":"https://acme-staging-v02.api.letsencrypt.org/directory"}
+
+Get configured ACME server
+    ${response} =  Run task    module/traefik1/get-acme-server    {}
+    Should Be Equal As Strings    ${response['url']}        https://acme-staging-v02.api.letsencrypt.org/directory
+
 Request an invalid certificate
     ${response} =  Run task    module/traefik1/set-certificate
     ...    {"fqdn":"example.com"}
