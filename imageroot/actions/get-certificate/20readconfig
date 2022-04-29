@@ -21,50 +21,10 @@
 #
 
 import json
-import os
-import agent
 import sys
-import re
-import urllib.request
+from get_certificate import get_certificate
 
 # Try to parse the stdin as JSON.
 # If parsing fails, output everything to stderr
-data = json.load(sys.stdin)
-fqdn = data['fqdn']
-certificate = {}
 
-api_path = os.environ["API_PATH"]
-moduleid = os.environ["MODULE_ID"]
-
-try:
-    # Get the certificate route from the API
-    with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/routers/certificate-{fqdn}@redis') as res:
-        traefik_https_route = json.load(res)
-
-    # Open the certificates storage file
-    with open(f'/home/{moduleid}/.local/share/containers/storage/volumes/traefik-acme/_data/acme.json') as f:
-        acme_storage = json.load(f)
-
-    certificate['fqdn'] = fqdn
-
-    certificate['obtained'] = False
-
-    resolver = traefik_https_route['tls']['certResolver']
-
-    certificates = acme_storage[resolver].get('Certificates')
-
-    # Check if the certificate is present in the storage
-    for cert in certificates if certificates else []:
-        if cert['domain']['main'] == data['fqdn']:
-            certificate['obtained'] = True
-            break
-
-except urllib.error.HTTPError as e:
-    if e.code == 404:
-        # If the certificate is not found, return an empty JSON object
-        pass
-
-except urllib.error.URLError as e:
-    raise Exception(f'Error reaching traefik daemon: {e.reason}') from e
-
-json.dump(certificate, fp=sys.stdout)
+json.dump(get_certificate(json.load(sys.stdin)), fp=sys.stdout)

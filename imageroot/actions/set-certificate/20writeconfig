@@ -41,7 +41,7 @@ if not agent_id:
     raise Exception("AGENT_ID not found inside the environemnt")
 
 # Connect to redis
-rdb = agent.redis_connect(privileged=True)
+rdb = agent.redis_connect(privileged=True).pipeline()
 
 # Setup HTTP ans HTTPS routers
 router=f'{agent_id}/kv/http/routers/certificate-{data["fqdn"]}'
@@ -53,6 +53,9 @@ rdb.set(f'{router}/priority', '1')
 rdb.set(f'{router}/tls', "true")
 rdb.set(f'{router}/tls/domains/0/main', data["fqdn"])
 rdb.set(f'{router}/tls/certresolver', "letsencrypt")
+
+# Write the configuration on redis
+rdb.execute()
 
 # Output valid JSON
 print("true")

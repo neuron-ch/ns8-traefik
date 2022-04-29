@@ -22,10 +22,12 @@
 
 import json
 import sys
-import agent
-from get_route import get_route
+import time
+from get_certificate import get_certificate
 
-# Try to parse the stdin as JSON.
-# If parsing fails, output everything to stderr
+data = json.load(sys.stdin)
+retry = 0
 
-json.dump(get_route(json.load(sys.stdin)), fp=sys.stdout)
+while get_certificate(data).get('fqdn') == data['fqdn'] and retry <= 10:
+    retry += 1
+    time.sleep(1)
