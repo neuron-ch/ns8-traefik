@@ -39,4 +39,7 @@ except urllib.error.URLError as e:
 # Gernerate the list of routes
 routes = [ route['name'].removesuffix('-https@redis') for route in traefik_routes if route['name'].endswith('-https@redis') ]
 
+# Don't list custom `/cluster-admin` route
+routes = list(filter(lambda route: route != "ApiServer", routes))
+
 json.dump(routes, fp=sys.stdout)
