@@ -20,26 +20,11 @@
 # along with NethServer.  If not, see COPYING.
 #
 
-import json
-import os
-import agent
-import sys
-import urllib.request
+import time
+from get_route import get_route
 
+retry = 0
 
-api_path = os.environ["API_PATH"]
-
-# Get the list of routers keys
-try:
-    with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/routers') as res:
-        traefik_routes = json.load(res)
-except urllib.error.URLError as e:
-    raise Exception(f'Error reaching traefik daemon: {e.reason}')
-
-# Gernerate the list of routes
-routes = [ route['name'].removesuffix('-https@redis') for route in traefik_routes if route['name'].endswith('-https@redis') ]
-
-# Don't list custom `/cluster-admin` route
-routes = list(filter(lambda route: route != "ApiServer", routes))
-
-json.dump(routes, fp=sys.stdout)
+while get_route({'instance': 'ApiServer'}).get('instance') != "ApiServer" and retry <= 10:
+    retry += 1
+    time.sleep(1)
