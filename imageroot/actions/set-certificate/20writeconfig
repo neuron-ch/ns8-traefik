@@ -52,7 +52,7 @@ rdb.set(f'{router}/rule', f'Host(`{data["fqdn"]}`) && Path(`/{path}`)')
 rdb.set(f'{router}/priority', '1')
 rdb.set(f'{router}/tls', "true")
 rdb.set(f'{router}/tls/domains/0/main', data["fqdn"])
-rdb.set(f'{router}/tls/certresolver', "letsencrypt")
+rdb.set(f'{router}/tls/certresolver', "acmeServer")
 
 # Write the configuration on redis
 rdb.execute()

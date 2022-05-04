@@ -11,6 +11,8 @@ The module exposes 2 actions:
 - `get-certificate`
 - `delete-certificate`
 - `list-certificates`
+- `set-acme-server`
+- `get-acme-server`
 
 ## set-route
 
@@ -185,4 +187,32 @@ api-cli run list-certificates --agent module/traefik1
 Output:
 ```json
 ["example.com"]
+```
+## set-acme-server
+
+This action allows setting an ACME server that traefik will use to request the HTTPS certificates.
+The default ACME server used is Let's Encrypt.
+
+The action takes 1 parameter:
+- `url`: ACME server URL
+
+Example:
+```
+api-cli run set-acme-server  --agent module/traefik1 --data '{"url":"https://acme-staging-v02.api.letsencrypt.org/directory"}
+```
+
+## get-acme-server
+
+This action returns the current configured ACME server.
+
+The action takes no parameter.
+
+Example:
+```
+api-cli run get-acme-server  --agent module/traefik1
+```
+
+Output:
+```
+{"url": "https://acme-staging-v02.api.letsencrypt.org/directory"}
 ```

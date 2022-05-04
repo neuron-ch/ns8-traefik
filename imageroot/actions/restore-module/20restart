@@ -25,50 +25,5 @@ set -e
 # Redirect any output to the journal (stderr)
 exec 1>&2
 
-LE_EMAIL=${LE_EMAIL:-root@$(hostname -f)}
-LOG_LEVEL=${LOG_LEVEL:-INFO}
-ACME_SERVER_URL=${ACME_SERVER_URL:-https://acme-v02.api.letsencrypt.org/directory}
-
-cat >traefik.yaml <<EOF 
-defaultEntryPoints:
-  - http
-  - https
-
-file: {}
-
-log:
-  level: $LOG_LEVEL
-
-accessLog: {}
-
-entryPoints:
-  http:
-   address: ":80"
-  https:
-   address: ":443"
-
-providers:
-  redis:
-    rootKey: "${AGENT_ID}/kv"
-    endpoints:
-      - "127.0.0.1:6379"
-
-tls:
-  certResolver: acmeServer
-  options: {}
-
-certificatesResolvers:
-  acmeServer:
-    acme:
-      email: ${LE_EMAIL}
-      caServer: ${ACME_SERVER_URL}
-      storage: /etc/traefik/acme/acme.json
-      httpChallenge:
-        entryPoint: http
-      tlsChallenge: false
-
-ping:
-  manualRouting: true
-
-api: {}
-EOF
+# Restart the services
+systemctl --user restart traefik.service
