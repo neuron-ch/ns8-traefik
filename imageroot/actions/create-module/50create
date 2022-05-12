@@ -25,8 +25,6 @@ set -e
 # Redirect any output to the journal (stderr)
 exec 1>&2
 
-CLUSTER_NETWORK=$(REDIS_USER=default redis-exec GET cluster/network | sed 's!None!0.0.0.0/0!')
-
 #
 # Configure HTTPS access to the API server with the auto-generated certificate, under the /cluster-admin
 # URL path prefix. The header "X-Forwarded-Prefix" is added to the forwarded request
@@ -43,14 +41,10 @@ SET "${AGENT_ID}/kv/http/routers/ApiServer-https/middlewares/1" "ApiServer-strip
 SET "${AGENT_ID}/kv/http/routers/ApiServer-http/entryPoints/0" "http"
 SET "${AGENT_ID}/kv/http/routers/ApiServer-http/rule" "Path(\`/cluster-admin\`) || PathPrefix(\`/cluster-admin/\`)"
 SET "${AGENT_ID}/kv/http/routers/ApiServer-http/service" "ApiServer"
-SET "${AGENT_ID}/kv/http/routers/ApiServer-http/middlewares/0" "ApiServerMw2"
-SET "${AGENT_ID}/kv/http/routers/ApiServer-http/middlewares/1" "ApiServer-stripprefix"
-SET "${AGENT_ID}/kv/http/routers/ApiServer-http/middlewares/2" "ApiServerMw1"
-SET "${AGENT_ID}/kv/http/services/ApiServer/loadBalancer/servers/0/url" "http://127.0.0.1:8080"
+SET "${AGENT_ID}/kv/http/routers/ApiServer-http/middlewares/0" "http2https-redirectscheme"
+SET "${AGENT_ID}/kv/http/services/ApiServer/loadBalancer/servers/0/url" "http://127.0.0.1:9311"
 SET "${AGENT_ID}/kv/http/middlewares/ApiServer-stripprefix/stripPrefix/forceSlash" "false"
 SET "${AGENT_ID}/kv/http/middlewares/ApiServer-stripprefix/stripPrefix/prefixes/0" "/cluster-admin"
-SET "${AGENT_ID}/kv/http/middlewares/ApiServerMw1/ipWhiteList/sourceRange/0" "127.0.0.1"
-SET "${AGENT_ID}/kv/http/middlewares/ApiServerMw1/ipWhiteList/sourceRange/1" "${CLUSTER_NETWORK}"
 SET "${AGENT_ID}/kv/http/middlewares/ApiServerMw2/redirectRegex/regex" "^.*/cluster-admin$"
 SET "${AGENT_ID}/kv/http/middlewares/ApiServerMw2/redirectRegex/replacement" "/cluster-admin/"
 EOF
