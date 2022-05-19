@@ -117,7 +117,9 @@ api-cli run delete-route --agent module/traefik1 --data '{"instance": "module1"}
 
 This action returns a list of configured routes, the list is an JSON array, and if no route is configured, an
 empty array is returned.
-The action takes no parameter:
+
+The action takes 1 optional parameter:
+- `expand_list`: if set to `true` the list will be expanded with all route's details
 
 Example:
 ```
@@ -128,6 +130,42 @@ Output:
 ```json
 ["module1", "module2", "module3"]
 ```
+
+Example list expanded:
+```
+api-cli run list-routes --agent module/traefik1 --data '{"expand_list": true}'
+```
+
+Output:
+```json
+[
+  {
+    "instance": "module1",
+    "host": "module.example.org",
+    "url": "http://127.0.0.0:2000",
+    "lets_encrypt": true,
+    "http2https": true
+  },
+  {
+    "instance": "module2",
+    "host": "module.example.org",
+    "path": "/foo",
+    "url": "http://127.0.0.0:2000",
+    "lets_encrypt": true,
+    "http2https": true,
+    "strip_prefix": false
+  },
+  {
+    "instance": "module3",
+    "path": "/foo",
+    "url": "http://127.0.0.0:2000",
+    "lets_encrypt": false,
+    "http2https": true,
+    "strip_prefix": false
+  }
+]
+```
+
 
 ## set-certificate
 
@@ -182,7 +220,9 @@ api-cli run delete-certificate --agent module/traefik1 --data "{\"fqdn\": \"$(ho
 
 This action returns a list of requested certificate, the list is an JSON array, and if no certificate was requested, an
 empty array is returned.
-The action takes no parameter:
+
+The action takes 1 optional parameter:
+- `expand_list`: if set to `true` the list will be expanded with all certificate's details
 
 Example:
 ```
@@ -193,6 +233,17 @@ Output:
 ```json
 ["example.com"]
 ```
+
+Example list expanded:
+```
+api-cli run list-certificates --agent module/traefik1 --data '{"expand_list": true}'
+```
+
+Output:
+```json
+[{"fqdn": "example.com", "obtained": false}]
+```
+
 ## set-acme-server
 
 This action allows setting an ACME server that traefik will use to request the HTTPS certificates.

@@ -43,10 +43,33 @@ Get host & path route
     Should Be Equal As Strings    ${response['strip_prefix']}    False
 
 Get routes list
-    ${response} =  Run task    module/traefik1/list-routes    {}
+    ${response} =  Run task    module/traefik1/list-routes    null
     Should Contain    ${response}    module1
     Should Contain    ${response}    module2
     Should Contain    ${response}    module3
+
+Get expanded routes list
+    ${response} =  Run task    module/traefik1/list-routes    {"expand_list": true}
+    Should Be Equal As Strings    ${response[0]['instance']}        module1
+    Should Be Equal As Strings    ${response[0]['path']}            /foo
+    Should Be Equal As Strings    ${response[0]['url']}              http://127.0.0.0:2000
+    Should Be Equal As Strings    ${response[0]['lets_encrypt']}    False
+    Should Be Equal As Strings    ${response[0]['http2https']}      True
+    Should Be Equal As Strings    ${response[0]['strip_prefix']}    False
+
+    Should Be Equal As Strings    ${response[1]['instance']}        module2
+    Should Be Equal As Strings    ${response[1]['host']}            foo.example.org
+    Should Be Equal As Strings    ${response[1]['url']}             http://127.0.0.0:2000
+    Should Be Equal As Strings    ${response[1]['lets_encrypt']}    True
+    Should Be Equal As Strings    ${response[1]['http2https']}      True
+
+    Should Be Equal As Strings    ${response[2]['instance']}        module3
+    Should Be Equal As Strings    ${response[2]['path']}            /bar
+    Should Be Equal As Strings    ${response[2]['host']}            bar.example.org
+    Should Be Equal As Strings    ${response[2]['url']}              http://127.0.0.0:2000
+    Should Be Equal As Strings    ${response[2]['lets_encrypt']}    True
+    Should Be Equal As Strings    ${response[2]['http2https']}      True
+    Should Be Equal As Strings    ${response[2]['strip_prefix']}    False
 
 Delete routes
     Run task    module/traefik1/delete-route   	 {"instance": "module1"}
@@ -54,5 +77,5 @@ Delete routes
     Run task    module/traefik1/delete-route   	 {"instance": "module3"}
 
 Get Empty routes list
-    ${response} =  Run task    module/traefik1/list-routes    {}
+    ${response} =  Run task    module/traefik1/list-routes    null
     Should Be Empty    ${response}

@@ -9,8 +9,14 @@
     ],
     "type": "array",
     "items": {
-	    "type": "string",
-            "format": "hostname",
-            "title": "A fully qualified domain name"
+	    "oneOf":[{
+		    "type": "object",
+		    "title": "A certificate expanded"
+	    },
+	    {
+		    "type": "string",
+		    "format": "hostname",
+		    "title": "A fully qualified domain name"
+	    }]
     }
 }

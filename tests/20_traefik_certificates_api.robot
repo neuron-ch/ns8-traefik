@@ -27,12 +27,17 @@ Get invalid cerficate status
     Should Be Equal As Strings    ${response['obtained']}    False
 
 Get certificate list
-    ${response} =  Run task    module/traefik1/list-certificates    {}
+    ${response} =  Run task    module/traefik1/list-certificates    null
     Should Contain    ${response}    example.com
+
+Get expanded certificate list
+    ${response} =  Run task    module/traefik1/list-certificates    {"expand_list": true}
+    Should Be Equal As Strings    ${response[0]['fqdn']}        example.com
+    Should Be Equal As Strings    ${response[0]['obtained']}    False
 
 Delete certificate
     Run task    module/traefik1/delete-certificate   	 {"fqdn": "example.com"}
 
 Get empty certificates list
-    ${response} =  Run task    module/traefik1/list-certificates    {}
+    ${response} =  Run task    module/traefik1/list-certificates    null
     Should Be Empty    ${response}

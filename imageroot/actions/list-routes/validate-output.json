@@ -9,7 +9,13 @@
     ],
     "type": "array",
     "items": {
-	    "type": "string",
-            "title": "Name of the route"
+	    "oneOf":[{
+		    "type": "object",
+		    "title": "A route expanded"
+	    },
+	    {
+		    "type": "string",
+		    "title": "Name of the route"
+	    }]
     }
 }

@@ -25,9 +25,12 @@ import os
 import agent
 import sys
 import urllib.request
+from get_certificate import get_certificate
 
 
 api_path = os.environ["API_PATH"]
+
+data = json.load(sys.stdin)
 
 # Get the list of routers keys
 try:
@@ -37,7 +40,10 @@ except urllib.error.URLError as e:
     raise Exception(f'Error reaching traefik daemon: {e.reason}') from e
 
 # Gernerate the list of certificates
-routes = [ route['name'].removeprefix('certificate-').removesuffix('@redis') for route in traefik_routes
+certificates = [ route['name'].removeprefix('certificate-').removesuffix('@redis') for route in traefik_routes
         if route['name'].startswith('certificate-') and route['name'].endswith('@redis') ]
 
-json.dump(routes, fp=sys.stdout)
+if data != None and data.get('expand_list'):
+    certificates = [ get_certificate({'fqdn': certificate}) for certificate in certificates ]
+
+json.dump(certificates, fp=sys.stdout)
