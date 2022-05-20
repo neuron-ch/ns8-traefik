@@ -68,6 +68,7 @@
         },
         "path": {
             "type":"string",
+            "pattern": "^/.*$",
             "title": "Request path prefix",
             "description": "A path prefix, the matching evaluation will be performed whit and without the trailing slash, eg /foo will match `/foo and `/foo/*, also `/foo/` will match /foo and /foo/*",
             "examples": [
