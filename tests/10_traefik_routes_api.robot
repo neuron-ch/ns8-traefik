@@ -15,6 +15,10 @@ Create a host & path rule
     ${response} =  Run task    module/traefik1/set-route
     ...    {"instance": "module3", "url": "http://127.0.0.0:2000", "host": "bar.example.org", "path": "/bar", "lets_encrypt": true, "http2https": true}
 
+Create an invalid path route
+    Run Keyword And Expect Error    *    Run task    module/traefik1/set-route
+    ...    {"instance": "module4", "url": "http://127.0.0.0:2000", "path": "bar", "lets_encrypt": true, "http2https": true}
+
 Get path route
     ${response} =  Run task    module/traefik1/get-route    {"instance": "module1"}
     Should Be Equal As Strings    ${response['instance']}        module1
