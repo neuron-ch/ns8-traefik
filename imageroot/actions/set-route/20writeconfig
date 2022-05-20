@@ -88,6 +88,9 @@ else:
 r.set(f'{router_s}/tls', "true")
 if data.get("host") is not None:
     r.set(f'{router_s}/tls/domains/0/main', data["host"])
+else:
+    r.delete(f'{router_s}/tls/domains/0/main')
+
 r.set(f'{router_s}/service', data["instance"])
 
 
@@ -109,6 +112,10 @@ if data.get("strip_prefix"):
     r.set(f'{middlewares}/{data["instance"]}-stripprefix/stripPrefix/prefixes/0', f'{path}')
     r.set(f'{router}/middlewares/1', f'{data["instance"]}-stripprefix')
     r.set(f'{router_s}/middlewares/1', f'{data["instance"]}-stripprefix')
+else:
+    r.delete(f'{middlewares}/{data["instance"]}-stripprefix/stripPrefix/prefixes/0')
+    r.delete(f'{router}/middlewares/1')
+    r.delete(f'{router_s}/middlewares/1')
 
 # Write the configuration on redis
 r.execute()
