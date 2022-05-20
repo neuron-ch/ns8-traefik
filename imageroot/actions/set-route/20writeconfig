@@ -56,7 +56,11 @@ r.set(f'{router_s}/entrypoints', "http,https")
 
 # Remove trailing slash if present
 if data.get("path") is not None:
-    path = data["path"].rstrip("/")
+    if data["path"] != "/":
+        path = data["path"].rstrip("/")
+        path_prefix = path + "/"
+    else:
+        path_prefix = path = "/"
 
 if data.get("host") is not None and data.get("path") is None:
     #http routes
@@ -67,17 +71,18 @@ if data.get("host") is not None and data.get("path") is None:
     r.set(f'{router_s}/priority', '3')
 elif data.get("host") is not None and data.get("path") is not None:
     #http routes
-    r.set(f'{router_s}/rule', f'Host(`{data["host"]}`) && (Path(`{path}`) || PathPrefix(`{path}/`))')
+    r.set(f'{router_s}/rule', f'Host(`{data["host"]}`) && (Path(`{path}`) || PathPrefix(`{path_prefix}`))')
     r.set(f'{router_s}/priority', '2')
     #https routes
-    r.set(f'{router}/rule', f'Host(`{data["host"]}`) && (Path(`{path}`) || PathPrefix(`{path}/`))')
+    r.set(f'{router}/rule', f'Host(`{data["host"]}`) && (Path(`{path}`) || PathPrefix(`{path_prefix}`))')
     r.set(f'{router}/priority', '2')
 else:
     #http routes
-    r.set(f'{router}/rule', f'Path(`{path}`) || PathPrefix(`{path}/`)')
+    r.set(f'{router}/rule', f'Path(`{path}`) || PathPrefix(`{path_prefix}`)')
     r.set(f'{router}/priority', '1')
     #https routes
-    r.set(f'{router_s}/rule', f'Path(`{path}`) || PathPrefix(`{path}/`)')
+    r.set(f'{router_s}/rule', f'Path(`{path}`) || PathPrefix(`{path_prefix}`)')
+    r.set(f'{router_s}/priority', '1')
     r.set(f'{router_s}/priority', '1')
 
 r.set(f'{router_s}/tls', "true")
