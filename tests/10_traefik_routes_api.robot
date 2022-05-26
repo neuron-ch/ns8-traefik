@@ -13,7 +13,7 @@ Create a host rule
 
 Create a host & path rule
     ${response} =  Run task    module/traefik1/set-route
-    ...    {"instance": "module3", "url": "http://127.0.0.0:2000", "host": "bar.example.org", "path": "/bar", "lets_encrypt": true, "http2https": true}
+    ...    {"instance": "module3", "url": "http://127.0.0.0:2000", "host": "bar.example.org", "path": "/bar", "lets_encrypt": true, "http2https": true, "user_created": true}
 
 Create an invalid path route
     Run Keyword And Expect Error    *    Run task    module/traefik1/set-route
@@ -27,6 +27,7 @@ Get path route
     Should Be Equal As Strings    ${response['lets_encrypt']}    False
     Should Be Equal As Strings    ${response['http2https']}      True
     Should Be Equal As Strings    ${response['strip_prefix']}    False
+    Should Be Equal As Strings    ${response['user_created']}    False
 
 Get host route
     ${response} =  Run task    module/traefik1/get-route    {"instance": "module2"}
@@ -35,6 +36,7 @@ Get host route
     Should Be Equal As Strings    ${response['url']}             http://127.0.0.0:2000
     Should Be Equal As Strings    ${response['lets_encrypt']}    True
     Should Be Equal As Strings    ${response['http2https']}      True
+    Should Be Equal As Strings    ${response['user_created']}    False
 
 Get host & path route
     ${response} =  Run task    module/traefik1/get-route    {"instance": "module3"}
@@ -45,6 +47,7 @@ Get host & path route
     Should Be Equal As Strings    ${response['lets_encrypt']}    True
     Should Be Equal As Strings    ${response['http2https']}      True
     Should Be Equal As Strings    ${response['strip_prefix']}    False
+    Should Be Equal As Strings    ${response['user_created']}    True
 
 Get routes list
     ${response} =  Run task    module/traefik1/list-routes    null
@@ -60,12 +63,14 @@ Get expanded routes list
     Should Be Equal As Strings    ${response[0]['lets_encrypt']}    False
     Should Be Equal As Strings    ${response[0]['http2https']}      True
     Should Be Equal As Strings    ${response[0]['strip_prefix']}    False
+    Should Be Equal As Strings    ${response[0]['user_created']}    False
 
     Should Be Equal As Strings    ${response[1]['instance']}        module2
     Should Be Equal As Strings    ${response[1]['host']}            foo.example.org
     Should Be Equal As Strings    ${response[1]['url']}             http://127.0.0.0:2000
     Should Be Equal As Strings    ${response[1]['lets_encrypt']}    True
     Should Be Equal As Strings    ${response[1]['http2https']}      True
+    Should Be Equal As Strings    ${response[1]['user_created']}    False
 
     Should Be Equal As Strings    ${response[2]['instance']}        module3
     Should Be Equal As Strings    ${response[2]['path']}            /bar
@@ -74,6 +79,7 @@ Get expanded routes list
     Should Be Equal As Strings    ${response[2]['lets_encrypt']}    True
     Should Be Equal As Strings    ${response[2]['http2https']}      True
     Should Be Equal As Strings    ${response[2]['strip_prefix']}    False
+    Should Be Equal As Strings    ${response[2]['user_created']}    True
 
 Delete routes
     Run task    module/traefik1/delete-route   	 {"instance": "module1"}
