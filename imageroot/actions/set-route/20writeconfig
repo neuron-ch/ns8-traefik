@@ -117,5 +117,11 @@ else:
     r.delete(f'{router}/middlewares/1')
     r.delete(f'{router_s}/middlewares/1')
 
+# Mark route as user_created
+if data.get('user_created') is not None and data["user_created"] is True:
+    r.sadd(f'{agent_id}/user_created_routes', data["instance"])
+else:
+    r.srem(f'{agent_id}/user_created_routes', data["instance"])
+
 # Write the configuration on redis
 r.execute()

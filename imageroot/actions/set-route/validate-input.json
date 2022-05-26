@@ -90,6 +90,12 @@
 	    "type": "boolean",
 	    "title": "Strip prefix path",
 	    "description": "Strip the path prefix from the request"
+	},
+	"user_created": {
+	    "type": "boolean",
+	    "title": "User created route flag",
+	    "description": "If true, the route is flagged as manually created by a user"
 	}
+
     }
 }

@@ -43,6 +43,7 @@ This is the priority of the rules type evaluation (top-down):
 - `lets_encrypt`: can be `true` or `false`, if set to `true` request a valid Let's Encrypt certificate, mandatory
 - `http2https` can be `true` or `false`, if set to `true` HTTP will be redirect to HTTPS, mandatory
 - `strip_prefix`: can be `true` or `false`, if set to `true` the prefix of the requested path will be stripped from the original request before sending it to the downstream server.
+- `user_created`: can be `true` or `false`, if set to `true` the route will be marked as manually created.
 
 ### Examples
 
