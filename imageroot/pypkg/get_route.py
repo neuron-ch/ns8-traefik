@@ -35,6 +35,7 @@ def get_route(data):
     route = {}
     api_path = os.environ["API_PATH"]
 
+    agent_id = os.environ["AGENT_ID"]
     try:
         # Get the http route from the API
         with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/routers/{module}-https@redis') as res:
@@ -78,6 +79,10 @@ def get_route(data):
         # Check if the path is striped from the request
         if route.get("path"):
             route['strip_prefix'] = True if middlewares and f'{module}-stripprefix@redis' in middlewares else False
+
+        # Check if the route was created manually
+        rdb = agent.redis_connect(privileged=True)
+        route['user_created'] = rdb.sismember(f'{agent_id}/user_created_routes', data["instance"])
 
     except urllib.error.HTTPError as e:
         if e.code == 404:
