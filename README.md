@@ -30,8 +30,8 @@ of rules:
 
 This is the priority of the rules type evaluation (top-down):
 
-1. only `host`
 1. `host` and `path`
+1. only `host`
 1. only `path`
 
 ### Parameters
