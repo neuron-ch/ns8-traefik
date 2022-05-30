@@ -5,7 +5,8 @@
     "description": "Request a let's encrypt certificate",
     "examples": [
         {"fqdn": "example.com"},
-        {"fqdn": "example.com", "sync":true}
+        {"fqdn": "example.com", "sync":true},
+        {"fqdn": "example.com", "sync":true, "sync_timeout": 300}
     ],
     "type": "object",
     "required": [
@@ -20,6 +21,13 @@
 	"sync": {
 	    "type":"boolean",
 	    "description": "Wait for the certificate to be obtained before return"
+	},
+	"sync_timeout": {
+	    "type":"integer",
+	    "minimum": 1,
+	    "description": "Max number of seconds to wait for the certificate to be obtained",
+	    "default": 120
 	}
+
     }
 }

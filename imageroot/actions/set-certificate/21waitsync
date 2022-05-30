@@ -29,6 +29,8 @@ data = json.load(sys.stdin)
 retry = 0
 certificate = {}
 
+sync_timeout = data['sync_timeout'] if data.get('sync_timeout') is not None else 120
+
 while get_certificate(data).get('fqdn') != data['fqdn'] and retry <= 10:
     retry += 1
     time.sleep(1)
@@ -37,7 +39,7 @@ certificate['obtained'] = get_certificate(data).get('obtained')
 
 if certificate['obtained'] is False and data.get('sync') is not None and data['sync'] is True:
     retry = 0
-    while certificate['obtained'] != True and retry < 120:
+    while certificate['obtained'] != True and retry < sync_timeout:
       certificate['obtained'] = get_certificate(data).get('obtained')
       retry += 1
       time.sleep(1)
