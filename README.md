@@ -178,8 +178,9 @@ It can be used when there is no hostname (or hostname + path) route
 configured on traefik module or if the service is not make accessible via
 traefik.
 
-The action takes 1 parameter:
+The action takes 2 parameter:
 - `fqdn`: the fqdn of the requested certificate
+- `sync`: wait until the certificate is obtained before return, default `false`.
 
 Example:
 ```

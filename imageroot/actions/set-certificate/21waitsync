@@ -35,4 +35,14 @@ while get_certificate(data).get('fqdn') != data['fqdn'] and retry <= 10:
 
 certificate['obtained'] = get_certificate(data).get('obtained')
 
+if certificate['obtained'] is False and data.get('sync') is not None and data['sync'] is True:
+    retry = 0
+    while certificate['obtained'] != True and retry < 120:
+      certificate['obtained'] = get_certificate(data).get('obtained')
+      retry += 1
+      time.sleep(1)
+
 json.dump(certificate, fp=sys.stdout)
+
+if data.get('sync') is not None and certificate['obtained'] is False:
+    exit(2)
