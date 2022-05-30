@@ -56,6 +56,3 @@ rdb.set(f'{router}/tls/certresolver', "acmeServer")
 
 # Write the configuration on redis
 rdb.execute()
-
-# Output valid JSON
-print("true")

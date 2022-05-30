@@ -186,6 +186,11 @@ Example:
 api-cli run set-certificate --agent module/traefik1 --data "{\"fqdn\": \"$(hostname -f)\""
 ```
 
+Output:
+```json
+{"fqdn": "example.com", "obtained": true}
+```
+
 ## get-certificate
 
 Run this action to get the status of requested a Let's Encrypt certificate

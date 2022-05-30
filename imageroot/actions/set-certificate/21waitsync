@@ -27,7 +27,12 @@ from get_certificate import get_certificate
 
 data = json.load(sys.stdin)
 retry = 0
+certificate = {}
 
 while get_certificate(data).get('fqdn') != data['fqdn'] and retry <= 10:
     retry += 1
     time.sleep(1)
+
+certificate['obtained'] = get_certificate(data).get('obtained')
+
+json.dump(certificate, fp=sys.stdout)
