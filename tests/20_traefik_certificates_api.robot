@@ -20,6 +20,7 @@ Get configured ACME server
 Request an invalid certificate
     ${response} =  Run task    module/traefik1/set-certificate
     ...    {"fqdn":"example.com"}
+    Should Be Equal As Strings    ${response['obtained']}    False
 
 Get invalid cerficate status
     ${response} =  Run task    module/traefik1/get-certificate    {"fqdn": "example.com"}
