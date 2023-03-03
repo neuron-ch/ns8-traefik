@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+
+#
+# Copyright (C) 2023 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+import json
+import sys
+import os
+import agent
+import yaml
+from pathlib import Path
+
+# Try to parse the stdin as JSON.
+# If parsing fails, output everything to stderr
+data = json.load(sys.stdin)
+
+agent_id = os.getenv("AGENT_ID", "")
+if not agent_id:
+    raise Exception("AGENT_ID not found inside the environemnt")
+
+# Connect to redis
+r = agent.redis_connect(privileged=True)
+
+# Prepare common key prefix
+prefix=f'{agent_id}/kv/http'
+router=f'{prefix}/routers/{data["instance"]}-http'
+router_s=f'{prefix}/routers/{data["instance"]}-https'
+middlewares=f'{prefix}/middlewares'
+
+# Cleanup headers middleware from route
+r.delete(f'{router}/middlewares/2')
+r.delete(f'{router_s}/middlewares/2')
+
+# Remove previous configuration
+p = Path(f'configs/{data["instance"]}-route.yml')
+p.unlink(missing_ok=True)
+
+# Prepare common dicts
+route = {'http': {}}
+middlewares = {}
+
+# Write headers configuration
+if "headers" in data and data["headers"]:
+
+    headers = { 'headers': {} }
+
+    if ("request" in data["headers"] and data["headers"]["request"]):
+        headers['headers']['customRequestHeaders'] = data['headers']['request']
+
+    if ("response" in data["headers"] and data["headers"]["response"]):
+        headers['headers']['customResponseHeaders'] = data['headers']['response']
+
+    if headers['headers']:
+        middlewares[f'{data["instance"]}-headers'] = headers
+
+if middlewares:
+    route['http']['middlewares'] = middlewares
+
+if route['http']:
+    with open(p.resolve(), 'w') as file:
+        yaml.dump(route, file)
+    r.set(f'{router}/middlewares/2', f'{data["instance"]}-headers@file')
+    r.set(f'{router_s}/middlewares/2', f'{data["instance"]}-headers@file')
+
+r.close()
