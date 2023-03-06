@@ -85,5 +85,10 @@ SET "${AGENT_ID}/kv/http/middlewares/ApisEndpointMw0/ipWhiteList/sourceRange/0" 
 SET "${AGENT_ID}/kv/http/middlewares/ApisEndpointMw1/stripPrefix/prefixes/0" "/${API_PATH}"
 EOF
 
+#
+# Create file provider configurations directory
+#
+mkdir configs
+
 # Enable and start the services
 systemctl --user enable --now traefik.service
