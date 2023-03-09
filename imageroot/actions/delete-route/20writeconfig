@@ -64,7 +64,9 @@ r.delete(f'{router_s}/tls/domains/0/main')
 r.delete(f'{router_s}/tls/certresolver')
 r.delete(f'{router}/middlewares/0')
 r.delete(f'{router}/middlewares/1')
+r.delete(f'{router}/middlewares/2')
 r.delete(f'{router_s}/middlewares/1')
+r.delete(f'{router_s}/middlewares/2')
 r.delete(f'{middlewares}/{data["instance"]}-stripprefix/stripPrefix/prefixes/0')
 
 # Write the configuration on redis

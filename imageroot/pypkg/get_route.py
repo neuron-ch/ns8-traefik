@@ -84,6 +84,20 @@ def get_route(data):
         rdb = agent.redis_connect(privileged=True)
         route['user_created'] = rdb.sismember(f'{agent_id}/user_created_routes', data["instance"])
 
+        if middlewares and f'{module}-headers@file' in middlewares:
+            try:
+                with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/middlewares/{module}-headers@file') as res:
+                    route['headers'] = {}
+                    headers_middleware = json.load(res)
+
+                    if 'customRequestHeaders' in headers_middleware['headers']:
+                        route['headers']['request'] = headers_middleware['headers']['customRequestHeaders']
+                    if 'customResponseHeaders' in headers_middleware['headers']:
+                        route['headers']['response'] = headers_middleware['headers']['customResponseHeaders']
+
+            except urllib.error.HTTPError as e:
+                raise Exception(f'Error reaching traefik daemon (middlewares): {e.reason}')
+
     except urllib.error.HTTPError as e:
         if e.code == 404:
             # If the route is not found, return an empty JSON object

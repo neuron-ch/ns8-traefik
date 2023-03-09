@@ -110,7 +110,26 @@
 	    "type": "boolean",
 	    "title": "User created route flag",
 	    "description": "If true, the route is flagged as manually created by a user"
-	}
-
+	},
+        "headers": {
+	    "type":"object",
+	    "title": "Headers list",
+	    "description": "Headers to add or remove from an HTTP's request or response",
+	    "additionalProperties": false,
+            "properties": {
+                "request": {
+                    "type": "object",
+                    "patternProperties": {
+                        ".*": {"type":"string"}
+                    }
+                },
+                "response": {
+                    "type": "object",
+                    "patternProperties": {
+                        ".*": {"type":"string"}
+                    }
+                }
+            }
+        }
     }
 }
