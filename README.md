@@ -8,14 +8,14 @@ roles are omitted.
 
 | Action      | Roles    |
 |-------------|----------|
-| `set-route` | routeadm |
-| `get-route` | routeadm |
-| `delete-route` | routeadm |
-| `list-routes` | routeadm |
-| `set-certificate` | certadm |
-| `get-certificate` | certadm |
-| `delete-certificate` | certadm |
-| `list-certificates` | certadm |
+| `set-route` | routeadm, fulladm |
+| `get-route` | routeadm, fulladm |
+| `delete-route` | routeadm, fulladm |
+| `list-routes` | routeadm, fulladm |
+| `set-certificate` | certadm, fulladm |
+| `get-certificate` | certadm, fulladm |
+| `delete-certificate` | certadm, fulladm |
+| `list-certificates` | certadm, fulladm |
 | `set-acme-server` | |
 | `get-acme-server` | |
 
