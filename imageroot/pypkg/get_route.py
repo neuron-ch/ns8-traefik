@@ -97,6 +97,18 @@ def get_route(data):
 
             except urllib.error.HTTPError as e:
                 raise Exception(f'Error reaching traefik daemon (middlewares): {e.reason}')
+        
+        if middlewares and f'{module}-auth@redis' in middlewares:
+            try:
+                with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/middlewares/{module}-auth@redis') as res:
+                    route['forward_auth'] = {}
+                    auth_middleware = json.load(res)
+
+                    route['forward_auth']['address'] = auth_middleware['forwardAuth']['address']
+                    route['forward_auth']['skip_tls_verify'] = auth_middleware['forwardAuth']['tls']['insecureSkipVerify']
+
+            except urllib.error.HTTPError as e:
+                raise Exception(f'Error reaching traefik daemon (middlewares): {e.reason}')
 
     except urllib.error.HTTPError as e:
         if e.code == 404:
