@@ -68,12 +68,6 @@ EOF
 #
 # Setup APIs endpoint
 #
-API_PATH=$(uuidgen)
-cat >&${AGENT_COMFD} <<EOF
-set-env API_PATH ${API_PATH}
-dump-env
-EOF
-
 redis-exec <<EOF
 SET "${AGENT_ID}/kv/http/routers/ApisEndpointHttp/entryPoints/0" "http"
 SET "${AGENT_ID}/kv/http/routers/ApisEndpointHttp/rule" "PathPrefix(\`/${API_PATH}/api\`)"
