@@ -25,16 +25,6 @@ set -e
 # Redirect any output to the journal (stderr)
 exec 1>&2
 
-LOG_LEVEL=${LOG_LEVEL:-INFO}
-ACME_SERVER_URL=${ACME_SERVER_URL:-https://acme-v02.api.letsencrypt.org/directory}
-
-cat >&${AGENT_COMFD} <<EOF
-set-env LE_EMAIL ${LE_EMAIL}
-set-env LOG_LEVEL ${LOG_LEVEL}
-set-env ACME_SERVER_URL ${ACME_SERVER_URL}
-dump-env
-EOF
-
 cat >traefik.yaml <<EOF 
 defaultEntryPoints:
   - http
