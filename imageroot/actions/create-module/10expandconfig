@@ -44,10 +44,6 @@ entryPoints:
    address: ":443"
 
 providers:
-  redis:
-    rootKey: "${AGENT_ID}/kv"
-    endpoints:
-      - "127.0.0.1:6379"
   file:
     directory: "/etc/traefik/configs"
 

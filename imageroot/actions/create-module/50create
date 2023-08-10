@@ -26,63 +26,102 @@ set -e
 exec 1>&2
 
 #
+# Create file provider configurations directory
+#
+mkdir configs
+
+
+#
 # Configure HTTPS access to the API server with the auto-generated certificate, under the /cluster-admin
 # URL path prefix. The header "X-Forwarded-Prefix" is added to the forwarded request
 #
-redis-exec <<EOF
-SETNX "${AGENT_ID}/kv" ""
-SET "${AGENT_ID}/kv/http/routers/ApiServer-https/entryPoints/0" "https"
-SET "${AGENT_ID}/kv/http/routers/ApiServer-https/rule" "Path(\`/cluster-admin\`) || PathPrefix(\`/cluster-admin/\`)"
-SET "${AGENT_ID}/kv/http/routers/ApiServer-https/priority" "1"
-SET "${AGENT_ID}/kv/http/routers/ApiServer-https/service" "ApiServer"
-SET "${AGENT_ID}/kv/http/routers/ApiServer-https/tls" "true"
-SET "${AGENT_ID}/kv/http/routers/ApiServer-https/middlewares/0" "ApiServerMw2"
-SET "${AGENT_ID}/kv/http/routers/ApiServer-https/middlewares/1" "ApiServer-stripprefix"
-SET "${AGENT_ID}/kv/http/routers/ApiServer-http/entryPoints/0" "http"
-SET "${AGENT_ID}/kv/http/routers/ApiServer-http/rule" "Path(\`/cluster-admin\`) || PathPrefix(\`/cluster-admin/\`)"
-SET "${AGENT_ID}/kv/http/routers/ApiServer-http/service" "ApiServer"
-SET "${AGENT_ID}/kv/http/routers/ApiServer-http/middlewares/0" "http2https-redirectscheme"
-SET "${AGENT_ID}/kv/http/services/ApiServer/loadBalancer/servers/0/url" "http://127.0.0.1:9311"
-SET "${AGENT_ID}/kv/http/middlewares/ApiServer-stripprefix/stripPrefix/forceSlash" "false"
-SET "${AGENT_ID}/kv/http/middlewares/ApiServer-stripprefix/stripPrefix/prefixes/0" "/cluster-admin"
-SET "${AGENT_ID}/kv/http/middlewares/ApiServerMw2/redirectRegex/regex" "^.*/cluster-admin$"
-SET "${AGENT_ID}/kv/http/middlewares/ApiServerMw2/redirectRegex/replacement" "/cluster-admin/"
+cat <<EOF > configs/_api_server.yml
+http:
+  middlewares:
+    ApiServer-stripprefix:
+      stripPrefix:
+        forceSlash: 'false'
+        prefixes:
+        - /cluster-admin
+    ApiServerMw2:
+      redirectRegex:
+        regex: ^.*/cluster-admin$
+        replacement: /cluster-admin/
+  routers:
+    ApiServer-http:
+      entrypoints:
+      - http
+      middlewares:
+      - http2https-redirectscheme
+      rule: Path(\`/cluster-admin\`) || PathPrefix(\`/cluster-admin/\`)
+      service: ApiServer
+    ApiServer-https:
+      entrypoints:
+      - https
+      middlewares:
+      - ApiServerMw2
+      - ApiServer-stripprefix
+      priority: '1'
+      rule: Path(\`/cluster-admin\`) || PathPrefix(\`/cluster-admin/\`)
+      service: ApiServer
+      tls: {}
+  services:
+    ApiServer:
+      loadBalancer:
+        servers:
+        - url: http://127.0.0.1:9311
 EOF
 
 #
 # Prepare middleware for HTTP to HTTPS redirect
 #
-redis-exec <<EOF
-SET "${AGENT_ID}/kv/http/middlewares/http2https-redirectscheme/redirectScheme/permanent" "true"
-SET "${AGENT_ID}/kv/http/middlewares/http2https-redirectscheme/redirectScheme/scheme" "https"
+cat <<EOF > configs/_http2https.yml
+http:
+  middlewares:
+    http2https-redirectscheme:
+      redirectScheme:
+        permanent: true
+        scheme: https
 EOF
 
 #
 # Configure default self-signed certificate
 #
-redis-exec <<EOF
-SET "${AGENT_ID}/kv/tls/stores/default/defaultCertificate/certFile" "/etc/traefik/selfsigned.crt"
-SET "${AGENT_ID}/kv/tls/stores/default/defaultCertificate/keyFile" "/etc/traefik/selfsigned.key"
+cat <<EOF > configs/_default_cert.yml
+tls:
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /etc/traefik/selfsigned.crt
+        keyFile: /etc/traefik/selfsigned.key
 EOF
 
 #
 # Setup APIs endpoint
 #
-redis-exec <<EOF
-SET "${AGENT_ID}/kv/http/routers/ApisEndpointHttp/entryPoints/0" "http"
-SET "${AGENT_ID}/kv/http/routers/ApisEndpointHttp/rule" "PathPrefix(\`/${API_PATH}/api\`)"
-SET "${AGENT_ID}/kv/http/routers/ApisEndpointHttp/service" "api@internal"
-SET "${AGENT_ID}/kv/http/routers/ApisEndpointHttp/middlewares/0" "ApisEndpointMw0"
-SET "${AGENT_ID}/kv/http/routers/ApisEndpointHttp/middlewares/1" "ApisEndpointMw1"
-SET "${AGENT_ID}/kv/http/routers/ApisEndpointHttp/priority" "1"
-SET "${AGENT_ID}/kv/http/middlewares/ApisEndpointMw0/ipWhiteList/sourceRange/0" "127.0.0.1"
-SET "${AGENT_ID}/kv/http/middlewares/ApisEndpointMw1/stripPrefix/prefixes/0" "/${API_PATH}"
-EOF
+cat <<EOF > configs/_api.yml
 
-#
-# Create file provider configurations directory
-#
-mkdir configs
+http:
+  middlewares:
+    ApisEndpointMw0:
+      ipWhiteList:
+        sourceRange:
+        - 127.0.0.1
+    ApisEndpointMw1:
+      stripPrefix:
+        prefixes:
+        - /${API_PATH}
+  routers:
+    ApisEndpointHttp:
+      entrypoints:
+      - http
+      middlewares:
+      - ApisEndpointMw1
+      - ApisEndpointMw0
+      priority: '1'
+      rule: PathPrefix(\`/${API_PATH}/api\`)
+      service: api@internal
+EOF
 
 # Create uploaded certificates folder
 mkdir custom_certificates
