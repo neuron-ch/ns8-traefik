@@ -13,7 +13,7 @@ exec 1>&2
 #
 # Create file provider configurations directory
 #
-mkdir configs
+mkdir -p configs
 
 
 #
@@ -110,7 +110,7 @@ http:
 EOF
 
 # Create uploaded certificates folder
-mkdir custom_certificates
+mkdir -p custom_certificates
 
 # Enable and start the services
 systemctl --user enable --now traefik.service
