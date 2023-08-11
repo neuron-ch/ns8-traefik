@@ -29,8 +29,8 @@
 import json
 import sys
 import os
-import agent
 import uuid
+import yaml
 
 # Try to parse the stdin as JSON.
 # If parsing fails, output everything to stderr
@@ -40,19 +40,17 @@ agent_id = os.getenv("AGENT_ID", "")
 if not agent_id:
     raise Exception("AGENT_ID not found inside the environemnt")
 
-# Connect to redis
-rdb = agent.redis_connect(privileged=True).pipeline()
-
 # Setup HTTP ans HTTPS routers
-router=f'{agent_id}/kv/http/routers/certificate-{data["fqdn"]}'
-rdb.set(f'{router}/entrypoints', "https")
-rdb.set(f'{router}/service', "ping@internal")
 path = uuid.uuid4()
-rdb.set(f'{router}/rule', f'Host(`{data["fqdn"]}`) && Path(`/{path}`)')
-rdb.set(f'{router}/priority', '1')
-rdb.set(f'{router}/tls', "true")
-rdb.set(f'{router}/tls/domains/0/main', data["fqdn"])
-rdb.set(f'{router}/tls/certresolver', "acmeServer")
+router = {
+        'entrypoints':  "https",
+        'service': "ping@internal",
+        'rule' :  f'Host(`{data["fqdn"]}`) && Path(`/{path}`)',
+        'priority': '1',
+        'tls': { 'domains': [{'main': data["fqdn"]}], 'certresolver': "acmeServer"}
+        }
 
-# Write the configuration on redis
-rdb.execute()
+# Write configuration file
+config = {"http": {"routers": {f'certificate-{data["fqdn"]}': router}}}
+with open(f'configs/certificate-{data["fqdn"]}.yml', 'w') as fp:
+    fp.write(yaml.safe_dump(config, default_flow_style=False, sort_keys=False, allow_unicode=True))
