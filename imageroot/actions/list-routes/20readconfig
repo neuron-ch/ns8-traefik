@@ -40,7 +40,7 @@ except urllib.error.URLError as e:
     raise Exception(f'Error reaching traefik daemon: {e.reason}')
 
 # Gernerate the list of routes
-routes = [ route['name'].removesuffix('-https@redis') for route in traefik_routes if route['name'].endswith('-https@redis') ]
+routes = [ route['name'].removesuffix('-https@file') for route in traefik_routes if route['name'].endswith('-https@file') ]
 
 # Don't list custom `/cluster-admin` route
 routes = list(filter(lambda route: route != "ApiServer", routes))
