@@ -42,8 +42,8 @@ except urllib.error.URLError as e:
     raise Exception(f'Error reaching traefik daemon: {e.reason}') from e
 
 # Gernerate the list of certificates
-certificates = [ route['name'].removeprefix('certificate-').removesuffix('@redis') for route in traefik_routes
-        if route['name'].startswith('certificate-') and route['name'].endswith('@redis') ]
+certificates = [ route['name'].removeprefix('certificate-').removesuffix('@file') for route in traefik_routes
+        if route['name'].startswith('certificate-') and route['name'].endswith('@file') ]
 
 if data != None and data.get('expand_list'):
     certificates = [ get_certificate({'fqdn': certificate}) for certificate in certificates ]
