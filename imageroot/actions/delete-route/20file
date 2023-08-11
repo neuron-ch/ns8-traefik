@@ -14,5 +14,9 @@ from pathlib import Path
 data = json.load(sys.stdin)
 
 # Remove route configuration
-p = Path(f'configs/{data["instance"]}-route.yml')
+p = Path(f'configs/{data["instance"]}.yml')
 p.unlink(missing_ok=True)
+
+# Remove manual flag
+pf = Path(f'manual_flags/{data["instance"]}')
+pf.unlink(missing_ok=True)
