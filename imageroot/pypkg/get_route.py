@@ -22,7 +22,6 @@
 
 import json
 import os
-import agent
 import re
 import urllib.request
 
@@ -38,10 +37,10 @@ def get_route(data):
     agent_id = os.environ["AGENT_ID"]
     try:
         # Get the http route from the API
-        with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/routers/{module}-https@redis') as res:
+        with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/routers/{module}-https@file') as res:
             traefik_https_route = json.load(res)
         # Get the https route from the API
-        with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/routers/{module}-http@redis') as res:
+        with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/routers/{module}-http@file') as res:
             traefik_http_route = json.load(res)
 
         # Check if the route is ready to use
@@ -50,7 +49,7 @@ def get_route(data):
 
         service_name = traefik_https_route['service']
         # Get the service from the API
-        with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/services/{service_name}@redis') as res:
+        with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/services/{service_name}@file') as res:
             service = json.load(res)
 
         route['instance'] = data['instance']
@@ -74,15 +73,14 @@ def get_route(data):
         middlewares = traefik_http_route.get("middlewares")
 
         # Check if redirect http to https is enabled
-        route['http2https'] = True if middlewares and "http2https-redirectscheme@redis" in middlewares else False
+        route['http2https'] = True if middlewares and "http2https-redirectscheme" in middlewares else False
 
         # Check if the path is striped from the request
         if route.get("path"):
-            route['strip_prefix'] = True if middlewares and f'{module}-stripprefix@redis' in middlewares else False
+            route['strip_prefix'] = True if middlewares and f'{module}-stripprefix' in middlewares else False
 
         # Check if the route was created manually
-        rdb = agent.redis_connect(privileged=True)
-        route['user_created'] = rdb.sismember(f'{agent_id}/user_created_routes', data["instance"])
+        route['user_created'] = os.path.isfile(f'manual_flags/{module}')
 
         if middlewares and f'{module}-headers@file' in middlewares:
             try:
@@ -100,7 +98,7 @@ def get_route(data):
 
         if middlewares and f'{module}-auth@redis' in middlewares:
             try:
-                with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/middlewares/{module}-auth@redis') as res:
+                with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/middlewares/{module}-auth@file') as res:
                     auth_middleware = json.load(res)
             except urllib.error.HTTPError as e:
                 raise Exception(f'Error reaching traefik daemon (middlewares): {e.reason}')
