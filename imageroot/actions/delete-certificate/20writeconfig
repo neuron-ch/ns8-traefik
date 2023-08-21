@@ -17,7 +17,7 @@ import sys
 import os
 import agent
 
-from custom_certificate_manager import delete_custom_certificate
+from custom_certificate_manager import delete_custom_certificate, list_custom_certificates
 
 # Try to parse the stdin as JSON.
 # If parsing fails, output everything to stderr
@@ -27,26 +27,15 @@ agent_id = os.getenv("AGENT_ID", "")
 if not agent_id:
     raise Exception("AGENT_ID not found inside the environemnt")
 
-try:
-    delete_custom_certificate(data['fqdn'])
-except FileNotFoundError:
-    # Connect to redis
-    rdb = agent.redis_connect(privileged=True).pipeline()
+# Try to delete uploaded certificate
+for cert in list_custom_certificates():
+    if cert.get('fqdn') == data['fqdn']:
+        delete_custom_certificate(data['fqdn'])
 
-    # Prepare common key prefix
-    router=f'{agent_id}/kv/http/routers/certificate-{data["fqdn"]}'
-
-    # Remove HTTPS router
-    rdb.delete(f'{router}/entrypoints')
-    rdb.delete(f'{router}/rule')
-    rdb.delete(f'{router}/priority')
-    rdb.delete(f'{router}/service')
-    rdb.delete(f'{router}/tls')
-    rdb.delete(f'{router}/tls/domains/0/main')
-    rdb.delete(f'{router}/tls/certresolver')
-
-    # Write the configuration on redis
-    rdb.execute()
+# Try to delete the route for obtained certificate
+cert_path = f'configs/certificate-{data["fqdn"]}.yml'
+if os.path.isfile(cert_path):
+    os.unlink(cert_path)
 
 # Output valid JSON
 print("true")
