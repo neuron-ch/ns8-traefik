@@ -18,7 +18,7 @@ def get_certificate(data):
         moduleid = os.environ["MODULE_ID"]
 
         # Get the certificate route from the API
-        with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/routers/certificate-{fqdn}@redis') as res:
+        with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/routers/certificate-{fqdn}@file') as res:
             traefik_https_route = json.load(res)
 
         # Check if the route is ready to use
