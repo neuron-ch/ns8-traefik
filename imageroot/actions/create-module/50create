@@ -40,13 +40,14 @@ http:
       - http2https-redirectscheme
       rule: Path(\`/cluster-admin\`) || PathPrefix(\`/cluster-admin/\`)
       service: ApiServer
+      priority: '100000'
     ApiServer-https:
       entrypoints:
       - https
       middlewares:
       - ApiServerMw2
       - ApiServer-stripprefix
-      priority: '1'
+      priority: '100000'
       rule: Path(\`/cluster-admin\`) || PathPrefix(\`/cluster-admin/\`)
       service: ApiServer
       tls: {}
@@ -103,7 +104,7 @@ http:
       middlewares:
       - ApisEndpointMw1
       - ApisEndpointMw0
-      priority: '1'
+      priority: '100000'
       rule: PathPrefix(\`/${API_PATH}/api\`)
       service: api@internal
 EOF
