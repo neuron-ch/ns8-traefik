@@ -25,6 +25,6 @@ from get_route import get_route
 
 retry = 0
 
-while get_route({'instance': 'ApiServer'}).get('instance') != "ApiServer" and retry <= 10:
+while get_route({'instance': 'ApiServer'}, ignore_error = True).get('instance') != "ApiServer" and retry <= 10:
     retry += 1
     time.sleep(1)

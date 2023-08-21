@@ -28,10 +28,11 @@ import urllib.request
 # Try to parse the stdin as JSON.
 # If parsing fails, output everything to stderr
 
-def get_route(data):
+def get_route(data, ignore_error = False):
 
     module = data['instance']
     route = {}
+    middlewares = []
     api_path = os.environ["API_PATH"]
 
     agent_id = os.environ["AGENT_ID"]
@@ -70,7 +71,9 @@ def get_route(data):
         # Check if the certificate is retrieved automatically
         route['lets_encrypt'] = True if traefik_https_route['tls'].get("certResolver") else False
 
-        middlewares = traefik_http_route.get("middlewares")
+        # Strip @file suffix  from middlware names
+        for mid in traefik_http_route.get("middlewares",[]):
+            middlewares.append(mid[0:mid.index('@')])
 
         # Check if redirect http to https is enabled
         route['http2https'] = True if middlewares and "http2https-redirectscheme" in middlewares else False
@@ -82,7 +85,7 @@ def get_route(data):
         # Check if the route was created manually
         route['user_created'] = os.path.isfile(f'manual_flags/{module}')
 
-        if middlewares and f'{module}-headers@file' in middlewares:
+        if middlewares and f'{module}-headers' in middlewares:
             try:
                 with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/middlewares/{module}-headers@file') as res:
                     route['headers'] = {}
@@ -96,7 +99,7 @@ def get_route(data):
             except urllib.error.HTTPError as e:
                 raise Exception(f'Error reaching traefik daemon (middlewares): {e.reason}')
 
-        if middlewares and f'{module}-auth@redis' in middlewares:
+        if middlewares and f'{module}-auth' in middlewares:
             try:
                 with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/middlewares/{module}-auth@file') as res:
                     auth_middleware = json.load(res)
@@ -118,6 +121,9 @@ def get_route(data):
             pass
 
     except urllib.error.URLError as e:
-        raise Exception(f'Error reaching traefik daemon: {e.reason}')
+        if ignore_error:
+            return route
+        else:
+            raise Exception(f'Error reaching traefik daemon: {e.reason}')
 
     return route
