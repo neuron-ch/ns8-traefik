@@ -9,13 +9,14 @@ import json
 import os
 import re
 import urllib.request
+from urllib.parse import quote
 
 # Try to parse the stdin as JSON.
 # If parsing fails, output everything to stderr
 
 def get_route(data, ignore_error = False):
 
-    module = data['instance']
+    module = quote(data['instance'])
     route = {}
     middlewares = []
     api_path = os.environ["API_PATH"]
@@ -33,7 +34,7 @@ def get_route(data, ignore_error = False):
         if traefik_http_route['status'] == 'disabled' or traefik_https_route['status'] == 'disabled':
             return {}
 
-        service_name = traefik_https_route['service']
+        service_name = quote(traefik_https_route['service'])
         # Get the service from the API
         with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/services/{service_name}@file') as res:
             service = json.load(res)
