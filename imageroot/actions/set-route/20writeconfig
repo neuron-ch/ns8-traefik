@@ -1,23 +1,8 @@
 #!/usr/bin/env python3
 
 #
-# Copyright (C) 2021 Nethesis S.r.l.
-# http://www.nethesis.it - nethserver@nethesis.it
-#
-# This script is part of NethServer.
-#
-# NethServer is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License,
-# or any later version.
-#
-# NethServer is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with NethServer.  If not, see COPYING.
+# Copyright (C) 2023 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
 #
 
 #
@@ -29,7 +14,8 @@
 import json
 import sys
 import os
-import agent
+import yaml
+import copy
 
 # Try to parse the stdin as JSON.
 # If parsing fails, output everything to stderr
@@ -39,20 +25,14 @@ agent_id = os.getenv("AGENT_ID", "")
 if not agent_id:
     raise Exception("AGENT_ID not found inside the environemnt")
 
-# Connect to redis
-r = agent.redis_connect(privileged=True).pipeline()
-
-# Prepare common key prefix
-prefix=f'{agent_id}/kv/http'
-router=f'{prefix}/routers/{data["instance"]}-http'
-router_s=f'{prefix}/routers/{data["instance"]}-https'
-middlewares=f'{prefix}/middlewares'
+middlewares = {}
+services = {}
+routers = {}
+router_http = {}
+router_https = {}
 
 # Setup HTTP ans HTTPS routers
-r.set(f'{prefix}/services/{data["instance"]}/loadBalancer/servers/0/url', data["url"])
-r.set(f'{router}/service', data["instance"])
-r.set(f'{router}/entrypoints', "http,https")
-r.set(f'{router_s}/entrypoints', "http,https")
+services[data["instance"]] = { "loadBalancer" : { "servers": [{"url": data["url"]}] } }
 
 # Remove trailing slash if present
 if data.get("path") is not None:
@@ -63,77 +43,76 @@ if data.get("path") is not None:
         path_prefix = path = "/"
 
 if data.get("host") is not None and data.get("path") is not None:
-    #http routes
-    r.set(f'{router_s}/rule', f'Host(`{data["host"]}`) && (Path(`{path}`) || PathPrefix(`{path_prefix}`))')
-    r.set(f'{router_s}/priority', '3')
-    #https routes
-    r.set(f'{router}/rule', f'Host(`{data["host"]}`) && (Path(`{path}`) || PathPrefix(`{path_prefix}`))')
-    r.set(f'{router}/priority', '3')
+    route = { "rule" :  f'Host(`{data["host"]}`) && (Path(`{path}`) || PathPrefix(`{path_prefix}`))', "priority": "3" }
 elif data.get("host") is not None:
-    #http routes
-    r.set(f'{router}/rule', f'Host(`{data["host"]}`)')
-    r.set(f'{router}/priority', '2')
-    #https routes
-    r.set(f'{router_s}/rule', f'Host(`{data["host"]}`)')
-    r.set(f'{router_s}/priority', '2')
+    route = { "rule":  f'Host(`{data["host"]}`)', "priority": '2'}
 else:
-    #http routes
-    r.set(f'{router}/rule', f'Path(`{path}`) || PathPrefix(`{path_prefix}`)')
-    r.set(f'{router}/priority', '1')
-    #https routes
-    r.set(f'{router_s}/rule', f'Path(`{path}`) || PathPrefix(`{path_prefix}`)')
-    r.set(f'{router_s}/priority', '1')
-    r.set(f'{router_s}/priority', '1')
+    route = { "rule": f'Path(`{path}`) || PathPrefix(`{path_prefix}`)', "priority": "1"}
 
-r.set(f'{router_s}/tls', "true")
+# Setup routers
+route["entryPoints"] = "http,https"
+route["service"] = data["instance"]
+route["middlewares"] = []
+router_http = copy.deepcopy(route)
+router_https = copy.deepcopy(route)
+router_https["tls"] = {}
+#router_https = route_s
 if data.get("host") is not None:
-    r.set(f'{router_s}/tls/domains/0/main', data["host"])
-else:
-    r.delete(f'{router_s}/tls/domains/0/main')
-
-r.set(f'{router_s}/service', data["instance"])
-
+    router_https["tls"]["domains"] = [{"main": data["host"]}]
 
 # Enable or disable Let's Encrypt certificate
 if data.get("host") is not None:
     if data["lets_encrypt"]:
-        r.set(f'{router_s}/tls/certresolver', "acmeServer")
-    else:
-        r.delete(f'{router_s}/tls/certresolver')
+        router_https["tls"]["certresolver"] = "acmeServer"
 
 # Enable or disable HTTP 2 HTTPS redirection
 if data["http2https"]:
-    r.set(f'{router}/middlewares/0', "http2https-redirectscheme")
-else:
-    r.delete(f'{router}/middlewares/0')
+    router_http["middlewares"] = ["http2https-redirectscheme"]
 
 # Strip the path from the request
 if data.get("strip_prefix"):
-    r.set(f'{middlewares}/{data["instance"]}-stripprefix/stripPrefix/prefixes/0', f'{path}')
-    r.set(f'{router}/middlewares/1', f'{data["instance"]}-stripprefix')
-    r.set(f'{router_s}/middlewares/1', f'{data["instance"]}-stripprefix')
-else:
-    r.delete(f'{middlewares}/{data["instance"]}-stripprefix/stripPrefix/prefixes/0')
-    r.delete(f'{router}/middlewares/1')
-    r.delete(f'{router_s}/middlewares/1')
+    middlewares[f'{data["instance"]}-stripprefix'] = { "stripPrefix": { "prefixes": path } }
+    router_http["middlewares"].append(f'{data["instance"]}-stripprefix')
+    router_https["middlewares"].append(f'{data["instance"]}-stripprefix')
 
 # Mark route as user_created
 if data.get('user_created') is not None and data["user_created"] is True:
-    r.sadd(f'{agent_id}/user_created_routes', data["instance"])
-else:
-    r.srem(f'{agent_id}/user_created_routes', data["instance"])
+    # Create flag
+    os.makedirs("manual_flags", exist_ok=True)
+    with open(f'manual_flags/{data["instance"]}', 'w') as fpm:
+        pass
 
 # Setup forward route
 if data.get("forward_auth"):
-    r.set(f'{middlewares}/{data["instance"]}-auth/forwardAuth/address', f'{data["forward_auth"]["address"]}')
-    r.set(f'{middlewares}/{data["instance"]}-auth/forwardAuth/tls/insecureSkipVerify', f'{data["forward_auth"].get("skip_tls_verify", False)}')
-    r.set(f'{router}/middlewares/20', f'{data["instance"]}-auth')
-    r.set(f'{router_s}/middlewares/20', f'{data["instance"]}-auth')
-else:
-    r.delete(f'{middlewares}/{data["instance"]}-auth/forwardAuth/address')
-    r.delete(f'{middlewares}/{data["instance"]}-auth/forwardAuth/tls/insecureSkipVerify')
-    r.delete(f'{router}/middlewares/20')
-    r.delete(f'{router_s}/middlewares/20')
+    middlewares[f'{data["instance"]}-auth'] = { "forwardAuth": {"address": data["forward_auth"]["address"], "tls": { "insecureSkipVerify": data["forward_auth"].get("skip_tls_verify", False) }}}
+    router_http["middlewares"].append(f'{data["instance"]}-auth')
+    router_https["middlewares"].append(f'{data["instance"]}-auth')
 
-# Write the configuration on redis
-r.execute()
+# Write headers configuration
+if "headers" in data and data["headers"]:
+    headers = { 'headers': {} }
+    if ("request" in data["headers"] and data["headers"]["request"]):
+        headers['headers']['customRequestHeaders'] = data['headers']['request']
+    if ("response" in data["headers"] and data["headers"]["response"]):
+        headers['headers']['customResponseHeaders'] = data['headers']['response']
+    if headers['headers']:
+        middlewares[f'{data["instance"]}-headers'] = headers
+
+    router_http["middlewares"].append(f'{data["instance"]}-headers')
+    router_https["middlewares"].append(f'{data["instance"]}-headers')
+
+# Cleanup middleware pointers
+if not router_http["middlewares"]:
+    del(router_http["middlewares"])
+if not router_https["middlewares"]:
+    del(router_https["middlewares"])
+
+# Write the configuration
+routers[f'{data["instance"]}-http'] = router_http
+routers[f'{data["instance"]}-https'] = router_https
+config = {"http": {"services": services, "routers": routers}}
+if middlewares:
+    config["http"]["middlewares"] = middlewares
+
+with open(f'configs/{data["instance"]}.yml', 'w') as fp:
+    fp.write(yaml.safe_dump(config, default_flow_style=False, sort_keys=False, allow_unicode=True))

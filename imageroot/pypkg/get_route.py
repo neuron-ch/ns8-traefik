@@ -1,56 +1,42 @@
 #!/usr/bin/env python3
 
 #
-# Copyright (C) 2022 Nethesis S.r.l.
-# http://www.nethesis.it - nethserver@nethesis.it
-#
-# This script is part of NethServer.
-#
-# NethServer is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License,
-# or any later version.
-#
-# NethServer is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with NethServer.  If not, see COPYING.
+# Copyright (C) 2023 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
 #
 
 import json
 import os
-import agent
 import re
 import urllib.request
+from urllib.parse import quote
 
 # Try to parse the stdin as JSON.
 # If parsing fails, output everything to stderr
 
-def get_route(data):
+def get_route(data, ignore_error = False):
 
-    module = data['instance']
+    module = quote(data['instance'])
     route = {}
+    middlewares = []
     api_path = os.environ["API_PATH"]
 
     agent_id = os.environ["AGENT_ID"]
     try:
         # Get the http route from the API
-        with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/routers/{module}-https@redis') as res:
+        with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/routers/{module}-https@file') as res:
             traefik_https_route = json.load(res)
         # Get the https route from the API
-        with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/routers/{module}-http@redis') as res:
+        with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/routers/{module}-http@file') as res:
             traefik_http_route = json.load(res)
 
         # Check if the route is ready to use
         if traefik_http_route['status'] == 'disabled' or traefik_https_route['status'] == 'disabled':
             return {}
 
-        service_name = traefik_https_route['service']
+        service_name = quote(traefik_https_route['service'])
         # Get the service from the API
-        with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/services/{service_name}@redis') as res:
+        with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/services/{service_name}@file') as res:
             service = json.load(res)
 
         route['instance'] = data['instance']
@@ -71,20 +57,21 @@ def get_route(data):
         # Check if the certificate is retrieved automatically
         route['lets_encrypt'] = True if traefik_https_route['tls'].get("certResolver") else False
 
-        middlewares = traefik_http_route.get("middlewares")
+        # Strip @file suffix  from middlware names
+        for mid in traefik_http_route.get("middlewares",[]):
+            middlewares.append(mid[0:mid.index('@')])
 
         # Check if redirect http to https is enabled
-        route['http2https'] = True if middlewares and "http2https-redirectscheme@redis" in middlewares else False
+        route['http2https'] = True if middlewares and "http2https-redirectscheme" in middlewares else False
 
         # Check if the path is striped from the request
         if route.get("path"):
-            route['strip_prefix'] = True if middlewares and f'{module}-stripprefix@redis' in middlewares else False
+            route['strip_prefix'] = True if middlewares and f'{module}-stripprefix' in middlewares else False
 
         # Check if the route was created manually
-        rdb = agent.redis_connect(privileged=True)
-        route['user_created'] = rdb.sismember(f'{agent_id}/user_created_routes', data["instance"])
+        route['user_created'] = os.path.isfile(f'manual_flags/{module}')
 
-        if middlewares and f'{module}-headers@file' in middlewares:
+        if middlewares and f'{module}-headers' in middlewares:
             try:
                 with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/middlewares/{module}-headers@file') as res:
                     route['headers'] = {}
@@ -98,9 +85,9 @@ def get_route(data):
             except urllib.error.HTTPError as e:
                 raise Exception(f'Error reaching traefik daemon (middlewares): {e.reason}')
 
-        if middlewares and f'{module}-auth@redis' in middlewares:
+        if middlewares and f'{module}-auth' in middlewares:
             try:
-                with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/middlewares/{module}-auth@redis') as res:
+                with urllib.request.urlopen(f'http://127.0.0.1/{api_path}/api/http/middlewares/{module}-auth@file') as res:
                     auth_middleware = json.load(res)
             except urllib.error.HTTPError as e:
                 raise Exception(f'Error reaching traefik daemon (middlewares): {e.reason}')
@@ -120,6 +107,9 @@ def get_route(data):
             pass
 
     except urllib.error.URLError as e:
-        raise Exception(f'Error reaching traefik daemon: {e.reason}')
+        if ignore_error:
+            return route
+        else:
+            raise Exception(f'Error reaching traefik daemon: {e.reason}')
 
     return route

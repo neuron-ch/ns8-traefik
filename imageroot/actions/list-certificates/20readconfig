@@ -2,22 +2,7 @@
 
 #
 # Copyright (C) 2023 Nethesis S.r.l.
-# http://www.nethesis.it - nethserver@nethesis.it
-#
-# This script is part of NethServer.
-#
-# NethServer is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License,
-# or any later version.
-#
-# NethServer is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with NethServer.  If not, see COPYING.
+# SPDX-License-Identifier: GPL-3.0-or-later
 #
 
 import json
@@ -42,8 +27,8 @@ except urllib.error.URLError as e:
     raise Exception(f'Error reaching traefik daemon: {e.reason}') from e
 
 # Gernerate the list of certificates
-certificates = [ route['name'].removeprefix('certificate-').removesuffix('@redis') for route in traefik_routes
-        if route['name'].startswith('certificate-') and route['name'].endswith('@redis') ]
+certificates = [ route['name'].removeprefix('certificate-').removesuffix('@file') for route in traefik_routes
+        if route['name'].startswith('certificate-') and route['name'].endswith('@file') ]
 
 if data != None and data.get('expand_list'):
     certificates = [ get_certificate({'fqdn': certificate}) for certificate in certificates ]
