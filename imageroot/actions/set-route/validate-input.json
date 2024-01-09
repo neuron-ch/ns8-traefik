@@ -42,7 +42,8 @@
     "required": [
         "instance",
         "url",
-        "http2https"
+        "http2https",
+        "skipCertVerify"
     ],
     "anyOf": [
         {
@@ -113,6 +114,11 @@
             "type": "boolean",
             "title": "Strip prefix path",
             "description": "Strip the path prefix from the request"
+        },
+       "skipCertVerify": {
+            "type": "boolean",
+            "title": "Skip certificate verification",
+            "description": "Do not verify the backend's certificate"
         },
         "user_created": {
             "type": "boolean",
