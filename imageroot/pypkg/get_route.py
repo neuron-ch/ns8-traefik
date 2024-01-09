@@ -41,6 +41,12 @@ def get_route(data, ignore_error = False):
 
         route['instance'] = data['instance']
 
+        # do not verify cert if the service is using a custom certificate
+        if 'loadBalancer' in service and 'serversTransport' in service['loadBalancer']:
+            route['skipCertVerify'] = True
+        else:
+            route['skipCertVerify'] = False
+
         # Extract the hostname from the rule of the router
         r =  re.match(r"^.*Host\(`(.*?)`\).*$", traefik_https_route['rule'])
         if r:
