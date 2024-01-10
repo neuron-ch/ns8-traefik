@@ -10,7 +10,7 @@
             "host": "module.example.org",
             "lets_encrypt": true,
             "http2https": true,
-            "skipCertVerify": true
+            "skip_cert_verify": true
         },
         {
             "instance": "module2",
@@ -20,7 +20,7 @@
             "lets_encrypt": true,
             "http2https": true,
             "strip_prefix": false,
-            "skipCertVerify": true
+            "skip_cert_verify": true
         },
         {
             "instance": "module3",
@@ -29,7 +29,7 @@
             "lets_encrypt": true,
             "http2https": true,
             "strip_prefix": false,
-            "skipCertVerify": true
+            "skip_cert_verify": true
         }
     ],
     "type": "object",
@@ -126,7 +126,7 @@
             "title": "Strip prefix path",
             "description": "Strip the path prefix from the request"
         },
-        "skipCertVerify": {
+        "skip_cert_verify": {
             "type": "boolean",
             "title": "Skip certificate verification",
             "description": "Do not verify the backend's certificate"

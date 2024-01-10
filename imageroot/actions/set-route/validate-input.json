@@ -114,7 +114,7 @@
             "title": "Strip prefix path",
             "description": "Strip the path prefix from the request"
         },
-       "skipCertVerify": {
+       "skip_cert_verify": {
             "type": "boolean",
             "title": "Skip certificate verification",
             "description": "Do not verify the backend's certificate"

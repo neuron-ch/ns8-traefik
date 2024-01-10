@@ -38,7 +38,7 @@ This is the priority of the rules type evaluation (top-down):
 ### Parameters
 
 - `instance`: the instance name, which is unique inside the cluster, mandatory
-- `skipCertVerify`: do not verify self signed certificate (boolean)
+- `skip_cert_verify`: do not verify self signed certificate (boolean)
 - `url`: the backend target URL, mandatory
 - `host`: a fully qualified domain name as virtual host
 - `path`: a path prefix, the matching evaluation will be performed whit and without the trailing slash, eg `/foo` will match `/foo` and `/foo/*`, also `/foo/` will match `/foo` and `/foo/*`
@@ -78,7 +78,7 @@ api-cli run set-route --agent module/traefik1 --data - <<EOF
   "host": "module.example.org",
   "lets_encrypt": true,
   "http2https": true,
-  "skipCertVerify": false
+  "skip_cert_verify": false
 }
 EOF
 ```
@@ -93,7 +93,7 @@ api-cli run set-route --agent module/traefik1 --data - <<EOF
   "path": "/foo",
   "lets_encrypt": true,
   "http2https": true,
-  "skipCertVerify": false
+  "skip_cert_verify": false
 }
 EOF
 ```
@@ -107,7 +107,7 @@ api-cli run set-route --agent module/traefik1 --data - <<EOF
   "path": "/foo",
   "lets_encrypt": true,
   "http2https": true,
-  "skipCertVerify": false
+  "skip_cert_verify": false
 }
 EOF
 ```
@@ -121,7 +121,7 @@ api-cli run set-route --agent module/traefik1 --data - <<EOF
   "host": "127.0.0.1",
   "lets_encrypt": false,
   "http2https": false,
-  "skipCertVerify": false,
+  "skip_cert_verify": false,
   "forward_auth": {
       "address": "http://127.0.0.1:9311/api/module/module1/http-basic/add-module1",
       "skip_tls_verify": true
@@ -189,7 +189,7 @@ Output:
     "url": "http://127.0.0.1:2000",
     "lets_encrypt": true,
     "http2https": true,
-    "skipCertVerify": false
+    "skip_cert_verify": false
   },
   {
     "instance": "module2",
@@ -199,7 +199,7 @@ Output:
     "lets_encrypt": true,
     "http2https": true,
     "strip_prefix": false,
-    "skipCertVerify": true
+    "skip_cert_verify": true
 
   },
   {
@@ -209,7 +209,7 @@ Output:
     "lets_encrypt": false,
     "http2https": true,
     "strip_prefix": false,
-    "skipCertVerify": false
+    "skip_cert_verify": false
 
   }
 ]

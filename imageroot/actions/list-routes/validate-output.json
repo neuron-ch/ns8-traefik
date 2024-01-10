@@ -7,7 +7,7 @@
         [
             {
                 "instance": "module1",
-                "skipCertVerify": false,
+                "skip_cert_verify": false,
                 "host": "host.domain.com",
                 "path": "/Path",
                 "url": "http://192.168.1.100",
@@ -85,7 +85,7 @@
                         "title": "Strip prefix path",
                         "description": "Strip the path prefix from the request"
                     },
-                    "skipCertVerify": {
+                    "skip_cert_verify": {
                         "type": "boolean",
                         "title": "Skip certificate verification",
                         "description": "Do not verify the backend's certificate"
