@@ -158,7 +158,6 @@
                 },
                 "required": [
                     "instance",
-                    "skipCertVerify",
                     "url",
                     "http2https",
                     "user_created"

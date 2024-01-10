@@ -42,8 +42,7 @@
     "required": [
         "instance",
         "url",
-        "http2https",
-        "skipCertVerify"
+        "http2https"
     ],
     "anyOf": [
         {
