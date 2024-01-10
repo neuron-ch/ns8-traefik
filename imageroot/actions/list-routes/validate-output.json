@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "http://schema.nethserver.org/samba/list-routes-output.json",
     "title": "list-routes output",
+    "$id": "http://schema.nethserver.org/samba/list-routes-output.json",
     "description": "Return a list of configured routes",
     "examples": [
         [
@@ -18,7 +18,8 @@
         ],
         [
             "module1"
-        ]
+        ],
+        []
     ],
     "type": "array",
     "items": {
