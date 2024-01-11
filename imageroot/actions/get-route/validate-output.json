@@ -9,7 +9,8 @@
             "url": "http://127.0.0.0:2000",
             "host": "module.example.org",
             "lets_encrypt": true,
-            "http2https": true
+            "http2https": true,
+            "skip_cert_verify": true
         },
         {
             "instance": "module2",
@@ -18,7 +19,8 @@
             "path": "/foo",
             "lets_encrypt": true,
             "http2https": true,
-            "strip_prefix": false
+            "strip_prefix": false,
+            "skip_cert_verify": true
         },
         {
             "instance": "module3",
@@ -26,7 +28,8 @@
             "path": "/foo",
             "lets_encrypt": true,
             "http2https": true,
-            "strip_prefix": false
+            "strip_prefix": false,
+            "skip_cert_verify": true
         }
     ],
     "type": "object",
@@ -122,6 +125,11 @@
             "type": "boolean",
             "title": "Strip prefix path",
             "description": "Strip the path prefix from the request"
+        },
+        "skip_cert_verify": {
+            "type": "boolean",
+            "title": "Skip certificate verification",
+            "description": "Do not verify the backend's certificate"
         },
         "user_created": {
             "type": "boolean",

@@ -30,9 +30,14 @@ services = {}
 routers = {}
 router_http = {}
 router_https = {}
+serversTransports={}
 
 # Setup HTTP ans HTTPS routers
 services[data["instance"]] = { "loadBalancer" : { "servers": [{"url": data["url"]}] } }
+# Setup serversTransports if we need to not verify self signed certificates
+if 'skip_cert_verify' in data and data["skip_cert_verify"]:
+    serversTransports[data["instance"]] =  {"insecureSkipVerify": True}
+    services[data["instance"]]['loadBalancer']["serversTransport"] = data["instance"]
 
 # Remove trailing slash if present
 if data.get("path") is not None:
@@ -111,6 +116,11 @@ if not router_https["middlewares"]:
 routers[f'{data["instance"]}-http'] = router_http
 routers[f'{data["instance"]}-https'] = router_https
 config = {"http": {"services": services, "routers": routers}}
+
+# Add serversTransports if we need to not verify self signed certificates
+if 'skip_cert_verify' in data and data["skip_cert_verify"]:
+    config["http"]["serversTransports"] =  serversTransports
+
 if middlewares:
     config["http"]["middlewares"] = middlewares
 
