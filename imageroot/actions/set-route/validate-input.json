@@ -71,6 +71,7 @@
     "properties": {
         "instance": {
             "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+$",
             "title": "Instance name",
             "examples": [
                 "module1"
