@@ -87,6 +87,7 @@
         "host": {
             "type": "string",
             "format": "hostname",
+            "pattern": "\\.",
             "title": "Virtualhost",
             "description": "A fully qualified domain name as virtualhost."
         },
