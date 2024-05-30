@@ -41,10 +41,12 @@ if ! openssl x509 -text -noout -in $CERT_FILE >/dev/null 2>&1; then
     exit 4
 fi
 
-# check if cert is provided by key
-cert_hash="$(openssl x509 -noout -modulus -in $CERT_FILE | openssl md5)"
-key_hash="$(openssl $TYPE_KEY -noout -modulus -in $KEY_FILE | openssl md5)"
-if [ "$cert_hash" != "$key_hash" ]; then
+# check if cert is provided by key (we compare md5 of public keys)
+cert_public_key="$(openssl x509 -noout -pubkey -in  $CERT_FILE | openssl md5)"
+key_public_key="$(openssl  pkey -pubout -in $KEY_FILE | openssl md5)"
+
+
+if [ "$cert_public_key" != "$key_public_key" ]; then
     echo "Key didn't generate certificate."
     del_certs
     exit 3
