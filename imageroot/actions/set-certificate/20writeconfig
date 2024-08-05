@@ -16,10 +16,17 @@ import sys
 import os
 import uuid
 import yaml
+from custom_certificate_manager import list_custom_certificates
 
 # Try to parse the stdin as JSON.
 # If parsing fails, output everything to stderr
 data = json.load(sys.stdin)
+
+
+#Don't request a certificate if it is already uploaded
+for cert in list_custom_certificates():
+    if cert.get('fqdn') == data['fqdn']:
+        sys.exit(0)
 
 agent_id = os.getenv("AGENT_ID", "")
 if not agent_id:

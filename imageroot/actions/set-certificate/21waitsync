@@ -10,10 +10,18 @@ import sys
 import time
 import agent
 from get_certificate import get_certificate
+from custom_certificate_manager import list_custom_certificates
 
 data = json.load(sys.stdin)
 retry = 0
 certificate = {}
+
+#Don't wait if certificate it is already uploaded
+for cert in list_custom_certificates():
+    if cert.get('fqdn') == data['fqdn']:
+        certificate['obtained'] = True
+        json.dump(certificate, fp=sys.stdout)
+        exit(0)
 
 sync_timeout = data['sync_timeout'] if data.get('sync_timeout') is not None else 120
 
