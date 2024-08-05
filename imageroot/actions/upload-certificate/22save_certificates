@@ -20,6 +20,11 @@ cn_name=$(openssl x509 -noout -subject -nameopt=multiline -in $CERT_FILE | sed -
 cp $KEY_FILE "custom_certificates/$cn_name.key"
 cp $CERT_FILE "custom_certificates/$cn_name.crt"
 
+#clenaup existing requested certificate if exists
+if [ -f "configs/certificate-${cn_name}.yml" ]; then
+    rm -f "configs/certificate-${cn_name}.yml"
+fi
+
 # write configuration file for certificate
 cat >"configs/certificate_${cn_name}.yml" <<EOF
 tls:
@@ -27,3 +32,5 @@ tls:
     - certFile: /etc/traefik/custom_certificates/$cn_name.crt
       keyFile: /etc/traefik/custom_certificates/$cn_name.key
 EOF
+
+
