@@ -61,4 +61,13 @@ Upload a custom certificate
     Should Be Equal As Strings    ${response['fqdn']}        test.example.com
     Should Be Equal As Strings    ${response['obtained']}    True
     Should Be Equal As Strings    ${response['type']}    custom
+    # check if the certificate is stored in redis
+    ${response} =    Execute Command    redis-cli --raw EXISTS module/traefik1/certificate/test.example.com
+    Should Be Equal As Integers    ${response}    1
+    ${response} =    Execute Command    redis-cli --raw HGET module/traefik1/certificate/test.example.com custom
+    Should Be Equal As Strings    ${response}    true
+
+Delete custom certificate
     Run task    module/traefik1/delete-certificate   	 {"fqdn": "test.example.com"}
+    ${response} =    Execute Command    redis-cli --raw EXISTS module/traefik1/certificate/test.example.com
+    Should Be Equal As Integers    ${response}    0
