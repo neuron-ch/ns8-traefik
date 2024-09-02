@@ -19,6 +19,7 @@ import json
 import agent
 import os.path
 import sys
+from custom_certificate_manager import list_custom_certificates
 
 module_id = os.environ['MODULE_ID']
 node_id = os.environ['NODE_ID']
@@ -33,9 +34,19 @@ except Exception as ex:
     print(agent.SD_WARNING + f"ACME TLS certificates for Traefik were not found in {path}: {ex}", file=sys.stderr)
     sys.exit(0)
 
+# retrieve custom certificates main domain
+certificates_custom = []
+for item in list_custom_certificates():
+    certificates_custom.append(item["fqdn"])
+
 rdb = agent.redis_connect(privileged=True)
 
 for info in certificates:
+
+    # skip custom certificates
+    if info["domain"]["main"] in certificates_custom:
+        continue
+
     rkey = f'module/{module_id}/certificate/{info["domain"]["main"]}'
     cur_cert = rdb.hget(rkey, 'cert')
     cur_key = rdb.hget(rkey, 'key')
