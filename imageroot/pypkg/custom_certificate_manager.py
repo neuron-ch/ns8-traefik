@@ -5,6 +5,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
+
+import agent
+import os
 from pathlib import Path
 
 CUSTOM_CERTIFICATES_DIR = 'custom_certificates'
@@ -64,5 +67,9 @@ def delete_custom_certificate(fqdn):
         cert_file_path.unlink()
         key_file_path.unlink()
         cert_config_path.unlink()
+        # remove the certificate and key from redis
+        rdb = agent.redis_connect(privileged=True)
+        rdb.delete(f'module/{os.environ["MODULE_ID"]}/certificate/{fqdn}')
+
     else:
         raise FileNotFoundError(f'Invalid custom certificate state for {fqdn}.')
