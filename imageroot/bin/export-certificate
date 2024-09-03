@@ -39,13 +39,16 @@ for info in certificates:
     rkey = f'module/{module_id}/certificate/{info["domain"]["main"]}'
     cur_cert = rdb.hget(rkey, 'cert')
     cur_key = rdb.hget(rkey, 'key')
-    # save the certificate only if not exists or if has been changed
-    if (not cur_cert or cur_cert != info["certificate"]) or (not cur_key or cur_key != info["key"]):
-        print(f'Saving certificate and key to {rkey}')
-        rdb.hset(rkey, mapping={"cert": info["certificate"], "key":  info["key"]})
+    custom = rdb.hget(rkey, 'custom')
+    # Skip if the certificate is custom
+    if not custom or custom != "true":
+        # save the certificate only if not exists or if has been changed
+        if (not cur_cert or cur_cert != info["certificate"]) or (not cur_key or cur_key != info["key"]):
+            print(f'Saving certificate and key to {rkey}')
+            rdb.hset(rkey, mapping={"cert": info["certificate"], "key":  info["key"], "custom": "false"})
 
-        # signal the certificate-updated event
-        event_key = f'module/{module_id}/event/certificate-updated'
-        print(f'Publishing event {event_key}')
-        event = {"rkey": rkey, "node": node_id, "module": module_id, "domain": info["domain"]}
-        rdb.publish(event_key, json.dumps(event))
+            # signal the certificate-updated event
+            event_key = f'module/{module_id}/event/certificate-updated'
+            print(f'Publishing event {event_key}')
+            event = {"rkey": rkey, "node": node_id, "module": module_id, "domain": info["domain"], "custom": False}
+            rdb.publish(event_key, json.dumps(event))
