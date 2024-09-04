@@ -45,6 +45,15 @@ Get empty certificates list
     ${response} =  Run task    module/traefik1/list-certificates    null
     Should Be Empty    ${response}
 
+Reject a certificate with missing or empty CN field
+    ${plain_key} =    Execute Command    openssl genrsa 4096
+    ${plain_csr} =    Execute Command    echo "${plain_key}" \| openssl req -key /dev/stdin -x509 -sha256 -days 3650 -nodes -subj "/CN=/O=YourOrganization/OU=YourUnit"  -addext "subjectAltName=DNS:test.example.com"
+    # base64 encode the key and csr
+    ${encoded_key} =    Execute Command    echo "${plain_key}" \| base64 -w 0
+    ${encoded_csr} =    Execute Command    echo "${plain_csr}" \| base64 -w 0
+    ${response} =  Run task    module/traefik1/upload-certificate
+    ...    {"keyFile": "${encoded_key}", "certFile": "${encoded_csr}"}    rc_expected=5    decode_json=False
+
 Generate a custom private and public key
     ${plain_key} =    Execute Command    openssl genrsa 4096
     ${plain_csr} =    Execute Command    echo "${plain_key}" \| openssl req -key /dev/stdin -x509 -sha256 -days 3650 -nodes -subj "/CN=test.example.com"  -addext "subjectAltName=DNS:test.example.com"
