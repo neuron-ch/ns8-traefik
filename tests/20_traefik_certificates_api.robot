@@ -44,3 +44,39 @@ Delete certificate
 Get empty certificates list
     ${response} =  Run task    module/traefik1/list-certificates    null
     Should Be Empty    ${response}
+
+Reject a certificate with missing or empty CN field
+    ${plain_key} =    Execute Command    openssl genrsa 4096
+    ${plain_csr} =    Execute Command    echo "${plain_key}" \| openssl req -key /dev/stdin -x509 -sha256 -days 3650 -nodes -subj "/CN=/O=YourOrganization/OU=YourUnit"  -addext "subjectAltName=DNS:test.example.com"
+    # base64 encode the key and csr
+    ${encoded_key} =    Execute Command    echo "${plain_key}" \| base64 -w 0
+    ${encoded_csr} =    Execute Command    echo "${plain_csr}" \| base64 -w 0
+    ${response} =  Run task    module/traefik1/upload-certificate
+    ...    {"keyFile": "${encoded_key}", "certFile": "${encoded_csr}"}    rc_expected=5    decode_json=False
+
+Generate a custom private and public key
+    ${plain_key} =    Execute Command    openssl genrsa 4096
+    ${plain_csr} =    Execute Command    echo "${plain_key}" \| openssl req -key /dev/stdin -x509 -sha256 -days 3650 -nodes -subj "/CN=test.example.com"  -addext "subjectAltName=DNS:test.example.com"
+    # base64 encode the key and csr
+    ${encoded_key} =    Execute Command    echo "${plain_key}" \| base64 -w 0
+    ${encoded_csr} =    Execute Command    echo "${plain_csr}" \| base64 -w 0
+    Set Suite Variable    ${key}   ${encoded_key}
+    Set Suite Variable    ${csr}   ${encoded_csr}
+
+Upload a custom certificate
+    ${response} =  Run task    module/traefik1/upload-certificate
+    ...    {"keyFile": "${key}", "certFile": "${csr}"}
+    ${response} =  Run task    module/traefik1/get-certificate    {"fqdn": "test.example.com"}
+    Should Be Equal As Strings    ${response['fqdn']}        test.example.com
+    Should Be Equal As Strings    ${response['obtained']}    True
+    Should Be Equal As Strings    ${response['type']}    custom
+    # check if the certificate is stored in redis
+    ${response} =    Execute Command    redis-cli --raw EXISTS module/traefik1/certificate/test.example.com
+    Should Be Equal As Integers    ${response}    1
+    ${response} =    Execute Command    redis-cli --raw HGET module/traefik1/certificate/test.example.com custom
+    Should Be Equal As Strings    ${response}    true
+
+Delete custom certificate
+    Run task    module/traefik1/delete-certificate   	 {"fqdn": "test.example.com"}
+    ${response} =    Execute Command    redis-cli --raw EXISTS module/traefik1/certificate/test.example.com
+    Should Be Equal As Integers    ${response}    0

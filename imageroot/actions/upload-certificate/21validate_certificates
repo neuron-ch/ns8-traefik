@@ -41,6 +41,14 @@ if ! openssl x509 -text -noout -in $CERT_FILE >/dev/null 2>&1; then
     exit 4
 fi
 
+# check it the common name is present and is not empty
+cn_name=$(openssl x509 -noout -subject -nameopt=multiline -in $CERT_FILE | sed -n 's/ *commonName *= //p')
+if [ -z "$cn_name" ]; then
+    echo "Certificate doesn't have a common name."
+    del_certs
+    exit 5
+fi
+
 # check if cert is provided by key (we compare md5 of public keys)
 cert_public_key="$(openssl x509 -noout -pubkey -in  $CERT_FILE | openssl md5)"
 key_public_key="$(openssl  pkey -pubout -in $KEY_FILE | openssl md5)"

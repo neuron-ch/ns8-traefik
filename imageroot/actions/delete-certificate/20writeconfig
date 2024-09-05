@@ -28,14 +28,17 @@ if not agent_id:
     raise Exception("AGENT_ID not found inside the environemnt")
 
 # Try to delete uploaded certificate
+custom_certificate = False
 for cert in list_custom_certificates():
     if cert.get('fqdn') == data['fqdn']:
         delete_custom_certificate(data['fqdn'])
+        custom_certificate = True
 
 # Try to delete the route for obtained certificate
-cert_path = f'configs/certificate-{data["fqdn"]}.yml'
-if os.path.isfile(cert_path):
-    os.unlink(cert_path)
+if not custom_certificate:
+    cert_path = f'configs/certificate-{data["fqdn"]}.yml'
+    if os.path.isfile(cert_path):
+        os.unlink(cert_path)
 
 # Output valid JSON
 print("true")
