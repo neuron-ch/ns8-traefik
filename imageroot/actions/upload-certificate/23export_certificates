@@ -31,7 +31,9 @@ result = subprocess.run(
 )
 
 subject = result.stdout
-domain = subject.split("\n")[1].split("CN=")[1]
+domain = {
+        "main": subject.split("\n")[0].split("CN=")[1],
+        }
 
 # save the certificate and key in redis
 rdb = agent.redis_connect(privileged=True)
