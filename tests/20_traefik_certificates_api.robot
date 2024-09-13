@@ -75,6 +75,11 @@ Upload a custom certificate
     Should Be Equal As Integers    ${response}    1
     ${response} =    Execute Command    redis-cli --raw HGET module/traefik1/certificate/test.example.com custom
     Should Be Equal As Strings    ${response}    true
+    # check if the certificate stored is base64 encoded
+    ${response} =    Execute Command    command=redis-cli HGET module/traefik1/certificate/test.example.com cert | base64 -d    return_stdout=False    return_rc=True
+    Should Be Equal As Integers    ${response}    0
+    ${response} =    Execute Command    command=redis-cli HGET module/traefik1/certificate/test.example.com key | base64 -d    return_stdout=False    return_rc=True
+    Should Be Equal As Integers    ${response}    0
 
 Delete custom certificate
     Run task    module/traefik1/delete-certificate   	 {"fqdn": "test.example.com"}
