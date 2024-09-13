@@ -36,7 +36,7 @@ domain = subject.split("\n")[1].split("CN=")[1]
 # save the certificate and key in redis
 rdb = agent.redis_connect(privileged=True)
 rkey = f'module/{module_id}/certificate/{domain}'
-rdb.hset(rkey, mapping={"cert": cert, "key": key, "custom": "true"})
+rdb.hset(rkey, mapping={"cert": data["certFile"], "key": data["keyFile"], "custom": "true"})
 
 # signal the certificate-updated event
 event_key = f'module/{module_id}/event/certificate-updated'
