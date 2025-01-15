@@ -59,11 +59,16 @@ fi
 cert_public_key="$(openssl x509 -noout -pubkey -in  $CERT_FILE | openssl md5)"
 key_public_key="$(openssl  pkey -pubout -in $KEY_FILE | openssl md5)"
 
-
 if [ "$cert_public_key" != "$key_public_key" ]; then
     echo "Key didn't generate certificate." 1>&2
     echo "set-status validation-failed" >&${AGENT_COMFD:-2}
     printf '{"field":"certFile","parameter":"certFile","value":"","error":"key_mismatch"}\n'
     del_certs
     exit 3
+fi
+
+# check for wildcard common name
+if echo "$cn_name" | grep -q '^\*'; then
+    wildcard_cn_name=$(echo "$cn_name" | sed 's/^\*\.//')
+    cn_name="wildcard_$wildcard_cn_name"
 fi

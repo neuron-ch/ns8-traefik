@@ -26,3 +26,8 @@ with open(CERT_FILE, 'w', encoding='UTF-8') as file:
 # decode key to file
 with open(KEY_FILE, 'w', encoding='UTF-8') as file:
     file.writelines(b64decode(data["keyFile"]).decode())
+
+# check for wildcard common name
+if "wildcard" in data:
+    wildcard_cn_name = data["wildcard"].replace("*.", "wildcard_")
+    data["wildcard"] = wildcard_cn_name

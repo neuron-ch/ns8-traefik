@@ -16,6 +16,13 @@ trap 'rm -f $KEY_FILE $CERT_FILE' EXIT
 # extract common name
 cn_name=$(openssl x509 -noout -subject -nameopt=multiline -in $CERT_FILE | sed -n 's/ *commonName *= //p')
 
+# check if the certificate is a wildcard certificate
+if echo "$cn_name" | grep -q '^\*'; then
+    # handle wildcard certificate
+    wildcard_cn_name=$(echo "$cn_name" | sed 's/^\*\.//')
+    cn_name="wildcard_$wildcard_cn_name"
+fi
+
 # copy certificate in traefik shared directory
 cp $KEY_FILE "custom_certificates/$cn_name.key"
 cp $CERT_FILE "custom_certificates/$cn_name.crt"

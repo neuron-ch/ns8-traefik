@@ -2,9 +2,77 @@
 <html>
     <head>
         <title>Traefik admin UI</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+            }
+            h1 {
+                color: #333;
+            }
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+            }
+            .certificates {
+                margin-top: 20px;
+            }
+            .certificate {
+                border: 1px solid #ccc;
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+            .certificate h2 {
+                margin-top: 0;
+            }
+            .actions {
+                margin-top: 10px;
+            }
+            .actions button {
+                margin-right: 10px;
+            }
+        </style>
     </head>
     <body>
-        <h1>Traefik admin UI</h1>
-        <p>This is a placeholder</p>
+        <div class="container">
+            <h1>Traefik admin UI</h1>
+            <div class="certificates">
+                <h2>Wildcard Certificates</h2>
+                <div id="wildcard-certificates"></div>
+                <div class="actions">
+                    <button onclick="uploadCertificate()">Upload Certificate</button>
+                </div>
+            </div>
+        </div>
+        <script>
+            function uploadCertificate() {
+                // Implement the logic to upload a wildcard certificate
+                alert('Upload Certificate functionality is not implemented yet.');
+            }
+
+            function fetchCertificates() {
+                // Implement the logic to fetch and display wildcard certificates
+                const certificates = [
+                    { fqdn: '*.example.com', type: 'custom', obtained: true },
+                    { fqdn: '*.mydomain.org', type: 'custom', obtained: true }
+                ];
+
+                const container = document.getElementById('wildcard-certificates');
+                container.innerHTML = '';
+
+                certificates.forEach(cert => {
+                    const certDiv = document.createElement('div');
+                    certDiv.className = 'certificate';
+                    certDiv.innerHTML = `
+                        <h2>${cert.fqdn}</h2>
+                        <p>Type: ${cert.type}</p>
+                        <p>Obtained: ${cert.obtained}</p>
+                    `;
+                    container.appendChild(certDiv);
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', fetchCertificates);
+        </script>
     </body>
 </html>

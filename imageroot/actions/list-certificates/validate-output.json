@@ -27,6 +27,11 @@
                 "fqdn": "webserver2.domain.com",
                 "type": "custom",
                 "obtained": true
+            },
+            {
+                "fqdn": "*.example.com",
+                "type": "custom",
+                "obtained": true
             }
         ]
     ],

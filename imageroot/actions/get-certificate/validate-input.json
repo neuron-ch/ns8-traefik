@@ -6,6 +6,9 @@
     "examples": [
         {
         "fqdn": "example.com"
+    },
+        {
+        "fqdn": "*.example.com"
     }
     ],
     "type": "object",
@@ -16,7 +19,7 @@
         "fqdn": {
             "type":"string",
             "format": "hostname",
-            "title": "A fully qualified domain name"
+            "title": "A fully qualified domain name or wildcard domain"
         }
     }
 }

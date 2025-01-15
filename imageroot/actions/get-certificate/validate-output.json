@@ -8,6 +8,11 @@
             "fqdn": "example.com",
             "obtained": "true",
             "type": "internal"
+        },
+        {
+            "fqdn": "*.example.com",
+            "obtained": "true",
+            "type": "custom"
         }
     ],
     "type": "object",
@@ -18,7 +23,7 @@
                 "fqdn": {
                     "type": "string",
                     "format": "hostname",
-                    "title": "A fully qualified domain name"
+                    "title": "A fully qualified domain name or wildcard domain"
                 },
                 "type": {
                     "type": "string",

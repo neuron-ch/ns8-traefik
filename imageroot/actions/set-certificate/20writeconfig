@@ -35,6 +35,11 @@ router = {
         'tls': { 'domains': [{'main': data["fqdn"]}], 'certresolver': "acmeServer"}
         }
 
+# Check if the certificate is a wildcard certificate
+if data["fqdn"].startswith("*."):
+    wildcard_fqdn = data["fqdn"].replace("*.", "wildcard_")
+    router['tls']['domains'][0]['main'] = wildcard_fqdn
+
 # Write configuration file
 config = {"http": {"routers": {f'certificate-{data["fqdn"]}': router}}}
 with open(f'configs/certificate-{data["fqdn"]}.yml', 'w') as fp:
