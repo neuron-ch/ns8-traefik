@@ -71,10 +71,6 @@ if data.get("host") is not None:
     if data["lets_encrypt"]:
         router_https["tls"]["certresolver"] = "acmeServer"
 
-# Enable or disable HTTP 2 HTTPS redirection
-if data["http2https"]:
-    router_http["middlewares"] = ["http2https-redirectscheme"]
-
 # Strip the path from the request
 if data.get("strip_prefix"):
     middlewares[f'{data["instance"]}-stripprefix'] = { "stripPrefix": { "prefixes": path } }
@@ -106,6 +102,10 @@ if "headers" in data and data["headers"]:
 
     router_http["middlewares"].append(f'{data["instance"]}-headers')
     router_https["middlewares"].append(f'{data["instance"]}-headers')
+
+# Enable or disable HTTP 2 HTTPS redirection
+if data["http2https"]:
+    router_http["middlewares"] = ["http2https-redirectscheme"]
 
 # Cleanup middleware pointers
 if not router_http["middlewares"]:
