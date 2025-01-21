@@ -25,10 +25,10 @@ agent_id = os.getenv("AGENT_ID", "")
 if not agent_id:
     raise Exception("AGENT_ID not found inside the environemnt")
 
-# Setup HTTP ans HTTPS routers
+# Setup HTTPS router
 path = uuid.uuid4()
 router = {
-        'entrypoints':  "https",
+        'entryPoints': ["https"],
         'service': "ping@internal",
         'rule' :  f'Host(`{data["fqdn"]}`) && Path(`/{path}`)',
         'priority': '1',

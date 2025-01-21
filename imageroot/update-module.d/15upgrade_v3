@@ -48,6 +48,15 @@ def upgrade_http_to_v3(ohttp):
     if 'routers' in ohttp:
         for krouter in ohttp['routers']:
             orouter = ohttp['routers'][krouter]
+            if type(orouter.get('entryPoints')) is str:
+                for kscheme in orouter['entryPoints'].split(","):
+                    if (is_http or is_https or is_certificate):
+                        orouter['entryPoints'] = [kscheme]
+                        print(f"Replaced string value for entryPoints in {krouter}")
+                        break
+                else:
+                    del orouter['entryPoints']
+                    print(f"Removed entryPoints in {krouter}")
             if not 'ruleSyntax' in orouter:
                 orouter['ruleSyntax'] = 'v2' # mark route match syntax as obsolete
     if 'middlewares' in ohttp:

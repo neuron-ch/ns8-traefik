@@ -55,11 +55,12 @@ else:
     route = { "rule": f'Path(`{path}`) || PathPrefix(`{path_prefix}`)', "priority": "1"}
 
 # Setup routers
-route["entryPoints"] = "http,https"
 route["service"] = data["instance"]
 route["middlewares"] = []
 router_http = copy.deepcopy(route)
+router_http['entryPoints'] = ["http"]
 router_https = copy.deepcopy(route)
+router_https['entryPoints'] = ["https"]
 router_https["tls"] = {}
 #router_https = route_s
 if data.get("host") is not None:
