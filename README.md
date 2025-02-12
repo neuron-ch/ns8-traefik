@@ -433,6 +433,17 @@ Example:
 api-cli run module/traefik1/set-trusted-proxies --data '{"proxies":["192.168.1.1","192.168.1.2"]}'
 ```
 
+Optionally, specify how many tiers of HTTP proxies are in front of
+traefik. If `depth` is not specified, assume just 1 tier is present. This
+argument is important to extract the correct client IP from the
+`X-Forwarded-For` header sent by the front end proxy.
+
+Example:
+```
+api-cli run module/traefik1/set-trusted-proxies --data '{"proxies":["192.168.1.1"], "depth": 2}'
+```
+
+
 ### get-trusted-proxies
 
 Return the list of IP addresses that are trusted as front-end HTTP
@@ -446,5 +457,5 @@ api-cli run module/traefik1/get-trusted-proxies
 
 Output:
 ```json
-{"proxies": ["192.168.1.2", "192.168.1.1"]}
+{"proxies": ["192.168.1.2", "192.168.1.1"], "depth": 1}
 ```

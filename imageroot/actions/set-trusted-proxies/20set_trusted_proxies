@@ -24,6 +24,10 @@ def main():
     curconf['entryPoints']['http']['forwardedHeaders']["trustedIPs"] = request['proxies']
     curconf['entryPoints']['https']['forwardedHeaders']["trustedIPs"] = request['proxies']
     conf_helpers.write_yaml_config(curconf, "traefik.yaml")
+    if len(request['proxies']) > 0:
+        agent.set_env('PROXIES_DEPTH', str(request.get('depth', 1)))
+    else:
+        agent.set_env('PROXIES_DEPTH', '0')
     agent.run_helper("systemctl", "--user", "restart", "traefik.service").check_returncode()
 
 def validate_request(request):

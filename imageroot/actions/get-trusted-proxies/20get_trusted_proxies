@@ -8,6 +8,7 @@
 import agent
 import json
 import sys
+import os
 import conf_helpers
 
 def main():
@@ -24,6 +25,7 @@ def main():
     ))
     response = {
         "proxies": proxies,
+        "depth": int(os.getenv("PROXIES_DEPTH", 0))
     }
     json.dump(response, fp=sys.stdout)
 
