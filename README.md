@@ -420,3 +420,31 @@ verification is controlled by the following environment settings:
 
 - `UPLOAD_CERTIFICATE_VERIFY_TYPE=none` – Certificate verification is
   skipped. Use this value to disable expiration date checks.
+
+### set-trusted-proxies
+
+This action configures Traefik to trust X-Forwarded-* headers from the
+given list of IP addresses.
+
+IPs must be in IPv4 or IPv6 format.
+
+Example:
+```
+api-cli run module/traefik1/set-trusted-proxies --data '{"proxies":["192.168.1.1","192.168.1.2"]}'
+```
+
+### get-trusted-proxies
+
+Return the list of IP addresses that are trusted as front-end HTTP
+proxies.
+
+
+Example:
+```
+api-cli run module/traefik1/get-trusted-proxies
+```
+
+Output:
+```json
+{"proxies": ["192.168.1.2", "192.168.1.1"]}
+```
