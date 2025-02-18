@@ -10,8 +10,8 @@ set -e
 rm -rf state-backup
 mkdir -vp state-backup
 
-cp -pvT traefik.yaml state-backup/
-cp -prvT configs state-backup/configs/
-cp -prvT manual_flags state-backup/manual_flags/
-cp -prvT custom_certificates state-backup/custom_certificates/
-cp -prvT acme/ state-backup/acme/
+cp -pvT traefik.yaml state-backup/traefik.yaml
+cp -prvT configs state-backup/configs
+cp -prvT manual_flags state-backup/manual_flags
+cp -prvT custom_certificates state-backup/custom_certificates
+cp -prvT acme state-backup/acme
