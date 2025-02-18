@@ -43,8 +43,8 @@ certificatesResolvers:
       caServer: https://acme-v02.api.letsencrypt.org/directory
       storage: /etc/traefik/acme/acme.json
       httpChallenge:
-        entryPoint: http
-      tlsChallenge: false
+        entryPoint: https
+      tlsChallenge: {}
 
 ping:
   manualRouting: true
