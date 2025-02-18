@@ -1,13 +1,9 @@
 #!/bin/bash
 
 #
-# Copyright (C) 2023 Nethesis S.r.l.
+# Copyright (C) 2025 Nethesis S.r.l.
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
-set -e
-
-exec 1>&2 # Send any output to stderr, to not alter the action response protocol
-
-#restart the traefik service
-systemctl --user restart traefik
+# Placeholder, see bug NethServer/dev#7058
+exit 0
