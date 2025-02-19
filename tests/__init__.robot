@@ -7,6 +7,7 @@ Suite Teardown    Tear down connection and test suite tools
 *** Variables ***
 ${SSH_KEYFILE}    %{HOME}/.ssh/id_ecdsa
 ${NODE_ADDR}      127.0.0.1
+${MID}            traefik1
 
 *** Keywords ***
 Connect to the node
@@ -19,6 +20,7 @@ Connect to the node
 Setup connection and test suite tools
     Connect to the node
     Save the journal begin timestamp
+    Set Global Variable    ${MID}    ${MID}
 
 Tear down connection and test suite tools
     Collect the suite journal
