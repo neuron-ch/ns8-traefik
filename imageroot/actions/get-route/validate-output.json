@@ -70,6 +70,11 @@
                 "lets_encrypt"
             ]
         },
+        "slash_redirect": {
+            "required": [
+                "path"
+            ]
+        },
         "strip_prefix": {
             "required": [
                 "path"
@@ -120,6 +125,11 @@
             "type": "boolean",
             "title": "HTTP to HTTPS redirection",
             "description": "Redirect all the HTTP requests to HTTPS"
+        },
+        "slash_redirect": {
+            "type": "boolean",
+            "title": "Slash redirect",
+            "description": "Redirect to path with trailing slash"
         },
         "strip_prefix": {
             "type": "boolean",

@@ -70,6 +70,10 @@ def get_route(data, ignore_error = False):
         # Check if redirect http to https is enabled
         route['http2https'] = True if middlewares and "http2https-redirectscheme" in middlewares else False
 
+        # Check if path wants slash
+        if route.get("path"):
+            route['slash_redirect'] = True if middlewares and f'{module}-slashredirect' in middlewares else False
+
         # Check if the path is striped from the request
         if route.get("path"):
             route['strip_prefix'] = True if middlewares and f'{module}-stripprefix' in middlewares else False

@@ -27,6 +27,14 @@
             "http2https": true
         },
         {
+            "instance": "wants-slash",
+            "url": "http://127.0.0.0:9311",
+            "path": "/foo",
+            "lets_encrypt": false,
+            "http2https": true,
+            "slash_redirect": true
+        },
+        {
             "instance": "module3",
             "url": "http://127.0.0.0:2000",
             "path": "/foo",
@@ -126,6 +134,11 @@
             "type": "boolean",
             "title": "Strip prefix path",
             "description": "Strip the path prefix from the request"
+        },
+        "slash_redirect": {
+            "type": "boolean",
+            "title": "Slash redirect",
+            "description": "Redirect to path with trailing slash"
         },
        "skip_cert_verify": {
             "type": "boolean",

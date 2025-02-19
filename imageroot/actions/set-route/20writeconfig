@@ -89,6 +89,18 @@ if data.get('ip_allowlist', []) != []:
     router_http["middlewares"].append(f'{data["instance"]}-ipallowlist')
     router_https["middlewares"].append(f'{data["instance"]}-ipallowlist')
 
+# If trailing slash is missing, fix it and redirect
+if path and data.get('slash_redirect'):
+    middlewares[f'{data["instance"]}-slashredirect'] = {
+        "redirectRegex": {
+            "regex": f"^.*{path}$",
+            "replacement": path + "/",
+            "permanent": True,
+        },
+    }
+    router_http["middlewares"].append(f'{data["instance"]}-slashredirect')
+    router_https["middlewares"].append(f'{data["instance"]}-slashredirect')
+
 # Strip the path from the request
 if path and data.get("strip_prefix"):
     middlewares[f'{data["instance"]}-stripprefix'] = { "stripPrefix": { "prefixes": path } }
