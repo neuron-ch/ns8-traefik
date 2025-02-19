@@ -120,6 +120,11 @@
                 "/foo/"
             ]
         },
+        "priority": {
+            "type":"integer",
+            "description": "Override the default priority assignment (1,2,3), based on host and path",
+            "minimum": 0
+        },
         "lets_encrypt": {
             "type": "boolean",
             "title": "Let's Encrypt certificate",

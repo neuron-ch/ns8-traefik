@@ -8,6 +8,7 @@
             "instance": "module1",
             "url": "http://127.0.0.0:2000",
             "host": "module.example.org",
+            "priority": 2,
             "lets_encrypt": true,
             "http2https": true,
             "skip_cert_verify": true
@@ -17,6 +18,7 @@
             "url": "http://127.0.0.0:2000",
             "host": "module.example.org",
             "path": "/foo",
+            "priority": 3,
             "lets_encrypt": true,
             "http2https": true,
             "strip_prefix": false,
@@ -26,6 +28,7 @@
             "instance": "module3",
             "url": "http://127.0.0.0:2000",
             "path": "/foo",
+            "priority": 3,
             "lets_encrypt": true,
             "http2https": true,
             "strip_prefix": false,
@@ -51,6 +54,7 @@
             "required": [
                 "instance",
                 "url",
+                "priority",
                 "http2https"
             ]
         },
@@ -94,6 +98,10 @@
                 "module1"
             ],
             "description": "The instance name, which is unique inside the cluster."
+        },
+        "priority": {
+            "type": "integer",
+            "description": "The Traefik router rule priority assigned to the HTTP route"
         },
         "url": {
             "type": "string",

@@ -50,11 +50,11 @@ if data.get("path") is not None:
         path_prefix = path = "/"
 
 if data.get("host") is not None and data.get("path") is not None:
-    route = { "rule" :  f'Host(`{data["host"]}`) && (Path(`{path}`) || PathPrefix(`{path_prefix}`))', "priority": "3" }
+    route = { "rule" :  f'Host(`{data["host"]}`) && (Path(`{path}`) || PathPrefix(`{path_prefix}`))', "priority": data.get('priority', 3) }
 elif data.get("host") is not None:
-    route = { "rule":  f'Host(`{data["host"]}`)', "priority": '2'}
+    route = { "rule":  f'Host(`{data["host"]}`)', "priority": data.get('priority', 2)}
 else:
-    route = { "rule": f'Path(`{path}`) || PathPrefix(`{path_prefix}`)', "priority": "1"}
+    route = { "rule": f'Path(`{path}`) || PathPrefix(`{path_prefix}`)', "priority": data.get('priority', 1)}
 
 # Setup routers
 route["service"] = data["instance"]

@@ -40,6 +40,7 @@ def get_route(data, ignore_error = False):
             service = json.load(res)
 
         route['instance'] = data['instance']
+        route['priority'] = traefik_https_route['priority']
 
         # do not verify cert if the service is using a custom certificate
         if 'loadBalancer' in service and 'serversTransport' in service['loadBalancer']:
