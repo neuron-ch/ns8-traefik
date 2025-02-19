@@ -42,8 +42,9 @@ EOF
 #
 # Setup APIs endpoint
 #
+API_PATH="$(uuidgen)"
+printf "API_PATH=%s\n" "${API_PATH}" >> environment
 cat <<EOF > configs/_api.yml
-
 http:
   middlewares:
     ApisEndpointMw0:
