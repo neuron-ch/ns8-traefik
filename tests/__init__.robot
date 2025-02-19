@@ -28,5 +28,6 @@ Save the journal begin timestamp
     Set Global Variable    ${JOURNAL_SINCE}    ${tsnow}
 
 Collect the suite journal
-    Execute Command    journalctl -S @${JOURNAL_SINCE} >journal-dump.log
+    Execute Command    printf "Test suite starts at %s\n" "$(date -d @${JOURNAL_SINCE})" >>journal-dump.log
+    Execute Command    journalctl >>journal-dump.log
     SSHLibrary.Get File    journal-dump.log    ${OUTPUT DIR}/journal-${SUITE NAME}.log

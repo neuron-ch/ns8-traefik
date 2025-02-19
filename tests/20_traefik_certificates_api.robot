@@ -69,7 +69,7 @@ Upload rejected for a self-signed certificate
 
 Upload a custom certificate
     # Disable strict certificate verification:
-    Execute Command    runagent -m traefik1 bash -c 'echo UPLOAD_CERTIFICATE_VERIFY_TYPE\=selfsign >> environment'
+    Execute Command    runagent -m traefik1 python3 -c 'import agent ; agent.set_env("UPLOAD_CERTIFICATE_VERIFY_TYPE", "selfsign")'
     ${response} =  Run task    module/traefik1/upload-certificate
     ...    {"keyFile": "${key}", "certFile": "${csr}"}
     ${response} =  Run task    module/traefik1/get-certificate    {"fqdn": "test.example.com"}
@@ -86,6 +86,7 @@ Upload a custom certificate
     Should Be Equal As Integers    ${response}    0
     ${response} =    Execute Command    command=redis-cli HGET module/traefik1/certificate/test.example.com key | base64 -d    return_stdout=False    return_rc=True
     Should Be Equal As Integers    ${response}    0
+    Execute Command    runagent -m traefik1 python3 -c 'import agent ; agent.set_env("UPLOAD_CERTIFICATE_VERIFY_TYPE", "chain")'
 
 Delete custom certificate
     Run task    module/traefik1/delete-certificate   	 {"fqdn": "test.example.com"}
