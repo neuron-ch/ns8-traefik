@@ -18,7 +18,7 @@ defaultEntryPoints:
 file: {}
 
 log:
-  level: $LOG_LEVEL
+  level: INFO
 
 accessLog: {}
 
@@ -39,12 +39,12 @@ tls:
 certificatesResolvers:
   acmeServer:
     acme:
-      email: ${LE_EMAIL}
-      caServer: ${ACME_SERVER_URL}
+      email: null
+      caServer: https://acme-v02.api.letsencrypt.org/directory
       storage: /etc/traefik/acme/acme.json
       httpChallenge:
-        entryPoint: http
-      tlsChallenge: false
+        entryPoint: https
+      tlsChallenge: {}
 
 ping:
   manualRouting: true

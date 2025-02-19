@@ -8,12 +8,5 @@
 import agent
 import os
 
-log_level = os.environ.get('LOG_LEVEL', 'INFO')
-acme_server_url = os.environ.get('ACME_SERVER_URL', 'https://acme-v02.api.letsencrypt.org/directory')
-le_email = os.environ.get('LE_EMAIL',"")
 uuid =  os.popen("uuidgen")
-
-agent.set_env('LOG_LEVEL', log_level)
-agent.set_env('ACME_SERVER_URL', acme_server_url)
-agent.set_env('LE_EMAIL', le_email)
 agent.set_env('API_PATH', uuid.read())

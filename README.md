@@ -305,8 +305,10 @@ Output (expanded format):
 This action allows setting an ACME server that traefik will use to request the HTTPS certificates.
 The default ACME server used is Let's Encrypt.
 
-The action takes 1 parameter:
-- `url`: ACME server URL
+The action parameters are:
+- `url`: ACME server URL (required)
+- `email`: Email address for Let's Encrypt account and notifications (optional)
+- `challenge`: one of `HTTP-01`, `TLS-ALPN-01` (optional)
 
 Example:
 ```
@@ -326,7 +328,7 @@ api-cli run get-acme-server  --agent module/traefik1
 
 Output:
 ```
-{"url": "https://acme-staging-v02.api.letsencrypt.org/directory"}
+{"url": "https://acme-staging-v02.api.letsencrypt.org/directory", "email":"", "challenge":"HTTP-01"}
 ```
 
 ## upload-certificate
