@@ -53,21 +53,28 @@ def remove_custom_cert(name):
 
 def has_acmejson_name(name):
     """Return True if name is found among acme.json Certificates."""
-    with open('acme/acme.json', 'r') as fp:
-        acmejson = json.load(fp)
-    for ocert in acmejson['acmeServer']["Certificates"] or []:
-        if ocert["domain"]["main"] == name or name in ocert["domain"].get("sans", []):
-            return True
+    try:
+        with open('acme/acme.json', 'r') as fp:
+            acmejson = json.load(fp)
+        for ocert in acmejson['acmeServer']["Certificates"] or []:
+            if ocert["domain"]["main"] == name or name in ocert["domain"].get("sans", []):
+                return True
+    except (FileNotFoundError, KeyError):
+        pass
     return False
 
 def has_acmejson_cert(main, sans=[]):
     """Return True if a certificate matching main and sans is found among
     acme.json Certificates."""
-    with open('acme/acme.json', 'r') as fp:
-        acmejson = json.load(fp)
-    for ocert in acmejson['acmeServer']["Certificates"] or []:
-        if ocert["domain"]["main"] == main and set(ocert["domain"].get("sans", [])) == set(sans):
-            return True
+    try:
+        with open('acme/acme.json', 'r') as fp:
+            acmejson = json.load(fp)
+        for ocert in acmejson['acmeServer']["Certificates"] or []:
+            if ocert["domain"]["main"] == main and set(ocert["domain"].get("sans", [])) == set(sans):
+                return True
+        return False
+    except (FileNotFoundError, KeyError):
+        pass
     return False
 
 def wait_acmejson_sync(timeout=120, interval=2.1, names=[]):
