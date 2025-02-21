@@ -27,9 +27,6 @@ except urllib.error.URLError as e:
 # Gernerate the list of routes
 routes = [ route['name'].removesuffix('-https@file') for route in traefik_routes if route['name'].endswith('-https@file') ]
 
-# Don't list custom `/cluster-admin` route
-routes = list(filter(lambda route: route != "ApiServer", routes))
-
 if data != None and data.get('expand_list'):
     routes = [ get_route({'instance': route}) for route in routes ]
 

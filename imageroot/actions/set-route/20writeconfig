@@ -25,6 +25,8 @@ agent_id = os.getenv("AGENT_ID", "")
 if not agent_id:
     raise Exception("AGENT_ID not found inside the environemnt")
 
+path = None
+path_prefix = None
 middlewares = {}
 services = {}
 routers = {}
@@ -48,11 +50,11 @@ if data.get("path") is not None:
         path_prefix = path = "/"
 
 if data.get("host") is not None and data.get("path") is not None:
-    route = { "rule" :  f'Host(`{data["host"]}`) && (Path(`{path}`) || PathPrefix(`{path_prefix}`))', "priority": "3" }
+    route = { "rule" :  f'Host(`{data["host"]}`) && (Path(`{path}`) || PathPrefix(`{path_prefix}`))', "priority": data.get('priority', 3) }
 elif data.get("host") is not None:
-    route = { "rule":  f'Host(`{data["host"]}`)', "priority": '2'}
+    route = { "rule":  f'Host(`{data["host"]}`)', "priority": data.get('priority', 2)}
 else:
-    route = { "rule": f'Path(`{path}`) || PathPrefix(`{path_prefix}`)', "priority": "1"}
+    route = { "rule": f'Path(`{path}`) || PathPrefix(`{path_prefix}`)', "priority": data.get('priority', 1)}
 
 # Setup routers
 route["service"] = data["instance"]
@@ -87,8 +89,20 @@ if data.get('ip_allowlist', []) != []:
     router_http["middlewares"].append(f'{data["instance"]}-ipallowlist')
     router_https["middlewares"].append(f'{data["instance"]}-ipallowlist')
 
+# If trailing slash is missing, fix it and redirect
+if path and data.get('slash_redirect'):
+    middlewares[f'{data["instance"]}-slashredirect'] = {
+        "redirectRegex": {
+            "regex": f"^.*{path}$",
+            "replacement": path + "/",
+            "permanent": True,
+        },
+    }
+    router_http["middlewares"].append(f'{data["instance"]}-slashredirect')
+    router_https["middlewares"].append(f'{data["instance"]}-slashredirect')
+
 # Strip the path from the request
-if data.get("strip_prefix"):
+if path and data.get("strip_prefix"):
     middlewares[f'{data["instance"]}-stripprefix'] = { "stripPrefix": { "prefixes": path } }
     router_http["middlewares"].append(f'{data["instance"]}-stripprefix')
     router_https["middlewares"].append(f'{data["instance"]}-stripprefix')

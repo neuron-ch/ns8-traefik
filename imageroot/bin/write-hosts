@@ -10,6 +10,7 @@ This script syncs the hosts from traefik to redis.
 Allows to notify modules of the change.
 """
 
+import sys
 import json
 import os
 import re
@@ -25,11 +26,17 @@ import agent
 api_path = os.environ["API_PATH"]
 session = Session()
 retries = Retry(
-    backoff_factor=0.5,
+    total=8, backoff_factor=0.5, # Sum of retry periods should be 63.5 seconds
+    status_forcelist=set(range(404,512)), # retry on error states during Traefik startup
 )
-session.mount('http://', HTTPAdapter(max_retries=retries))
-response = session.get(f'http://127.0.0.1/{api_path}/api/http/routers').json()
-session.close()
+
+try:
+    session.mount('http://', HTTPAdapter(max_retries=retries))
+    response = session.get(f'http://127.0.0.1/{api_path}/api/http/routers').json()
+    session.close()
+except Exception as ex:
+    print(agent.SD_ERR, ex, file=sys.stderr)
+    sys.exit(1)
 
 # Connect to redis using module credentials
 agent_id = os.getenv("AGENT_ID")

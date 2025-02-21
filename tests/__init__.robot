@@ -7,6 +7,7 @@ Suite Teardown    Tear down connection and test suite tools
 *** Variables ***
 ${SSH_KEYFILE}    %{HOME}/.ssh/id_ecdsa
 ${NODE_ADDR}      127.0.0.1
+${MID}            traefik1
 
 *** Keywords ***
 Connect to the node
@@ -19,6 +20,7 @@ Connect to the node
 Setup connection and test suite tools
     Connect to the node
     Save the journal begin timestamp
+    Set Global Variable    ${MID}    ${MID}
 
 Tear down connection and test suite tools
     Collect the suite journal
@@ -28,5 +30,6 @@ Save the journal begin timestamp
     Set Global Variable    ${JOURNAL_SINCE}    ${tsnow}
 
 Collect the suite journal
-    Execute Command    journalctl -S @${JOURNAL_SINCE} >journal-dump.log
+    Execute Command    printf "Test suite starts at %s\n" "$(date -d @${JOURNAL_SINCE})" >>journal-dump.log
+    Execute Command    journalctl >>journal-dump.log
     SSHLibrary.Get File    journal-dump.log    ${OUTPUT DIR}/journal-${SUITE NAME}.log
