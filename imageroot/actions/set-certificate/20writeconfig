@@ -9,16 +9,22 @@ import json
 import sys
 import os
 import cert_helpers
+import agent
+import datetime
 
 def main():
+    tstart = datetime.datetime.now(datetime.UTC)
     request = json.load(sys.stdin)
     cert_helpers.add_default_certificate_name(request['fqdn'])
     if request.get('sync'):
-        obtained = cert_helpers.wait_acmejson_sync(timeout=request.get('sync_timeout', 120))
+        obtained = cert_helpers.wait_acmejson_sync(timeout=request.get('sync_timeout', 30))
     else:
         obtained = False
     json.dump({"obtained": obtained}, fp=sys.stdout)
     if request.get('sync') is not None and obtained is False:
+        acme_error = cert_helpers.traefik_last_acme_error_since(tstart)
+        for errline in acme_error.split('\n'):
+            print(agent.SD_ERR + errline, file=sys.stderr)
         exit(2)
 
 if __name__ == "__main__":

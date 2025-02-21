@@ -10,6 +10,8 @@ import yaml
 import json
 import time
 import glob
+import subprocess
+import datetime
 
 def read_default_cert_names():
     """Return the list of host names configured in the
@@ -165,3 +167,28 @@ def parse_yaml_config(path):
     with open(path, 'r') as fp:
         conf = yaml.safe_load(fp)
     return conf
+
+def traefik_last_acme_error_since(tstart):
+    """Get the last Traefik error related to ACME from Loki.
+
+    :param tstart: a ISO8601 string with TZ offset
+    :return: string
+    """
+    try:
+        acme_error = subprocess.check_output([
+            "logcli",
+            "query",
+            "--limit=1",
+            "--from=" + tstart.isoformat(),
+            "--timezone=Local", # use system timezone for output
+            "--quiet",
+            "--no-labels",
+            '{module_id=~"traefik.+"} | json | line_format "{{.MESSAGE}}"' + \
+            '| logfmt | providerName="acmeServer.acme" and error!=""' + \
+            '| line_format "{{.error}}"',
+        ], timeout=15, text=True)
+    except subprocess.TimeoutExpired as ex:
+        acme_error = 'traefik_last_acme_error_since(): logcli timeout - ' + str(ex)
+    except subprocess.CalledProcessError as ex:
+        acme_error = 'traefik_last_acme_error_since(): logcli error - ' + str(ex)
+    return acme_error

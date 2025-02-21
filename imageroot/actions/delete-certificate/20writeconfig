@@ -10,14 +10,22 @@ import sys
 import os
 import cert_helpers
 import agent
+import datetime
 
 def main():
+    tstart = datetime.datetime.now(datetime.UTC)
     request = json.load(sys.stdin)
     fqdn = request['fqdn']
     if fqdn in cert_helpers.read_custom_cert_names():
         cert_helpers.remove_custom_cert(fqdn)
     elif fqdn in cert_helpers.read_default_cert_names():
         cert_helpers.remove_default_certificate_name(fqdn)
+        obtained = cert_helpers.wait_acmejson_sync(timeout=request.get('sync_timeout', 30))
+        if not obtained:
+            acme_error = cert_helpers.traefik_last_acme_error_since(tstart)
+            for errline in acme_error.split("\n"):
+                print(agent.SD_ERR + errline, file=sys.stderr)
+            exit(3)
     else:
         agent.set_status('validation-failed')
         json.dump([{'field': 'fqdn','parameter':'fqdn','value': fqdn,'error':'certificate_not_found'}], fp=sys.stdout)
