@@ -79,6 +79,8 @@ def wait_acmejson_sync(timeout=120, interval=2.1, names=[]):
     if not names:
         # Wait for the default certificate.
         names = read_default_cert_names()
+    if not names:
+        return True # Consider as obtained, if no names are set.
     elapsed = 0.0
     while elapsed < timeout:
         time.sleep(interval)
