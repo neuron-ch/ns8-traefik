@@ -59,7 +59,7 @@ def has_acmejson_name(name):
         for ocert in acmejson['acmeServer']["Certificates"] or []:
             if ocert["domain"]["main"] == name or name in ocert["domain"].get("sans", []):
                 return True
-    except (FileNotFoundError, KeyError):
+    except (FileNotFoundError, KeyError, json.JSONDecodeError):
         pass
     return False
 
@@ -73,7 +73,7 @@ def has_acmejson_cert(main, sans=[]):
             if ocert["domain"]["main"] == main and set(ocert["domain"].get("sans", [])) == set(sans):
                 return True
         return False
-    except (FileNotFoundError, KeyError):
+    except (FileNotFoundError, KeyError, json.JSONDecodeError):
         pass
     return False
 
