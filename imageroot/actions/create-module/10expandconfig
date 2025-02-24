@@ -19,6 +19,7 @@ file: {}
 
 log:
   level: INFO
+  noColor: true
 
 accessLog: {}
 
