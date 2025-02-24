@@ -48,6 +48,7 @@ def upgrade_to_v3(static_cfg):
         write_dynamic_config("./configs/_default_cert.yml", defcert)
     # Required configuration upgrade from v2 to v3 format:
     static_cfg['core']['defaultRuleSyntax'] = 'v3'
+    static_cfg['log'] = {'noColor': True, 'level': 'INFO'}
     for config_file in glob.glob("./configs/*.yml"):
         try:
             with open(config_file) as ofile:
