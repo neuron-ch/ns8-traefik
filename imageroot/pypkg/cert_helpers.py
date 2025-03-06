@@ -104,19 +104,25 @@ def wait_acmejson_sync(timeout=120, interval=2.1, names=[]):
         '| logfmt | providerName="acmeServer.acme" and error!=""' + \
         '| line_format "{{.error}}"',
     ]
+    obtained = False
     with subprocess.Popen(logcli_cmd, stdout=subprocess.PIPE, text=True) as logcli_proc:
         fdmon = logcli_proc.stdout.fileno()
-        while elapsed < timeout:
+        while True:
             time.sleep(interval)
             elapsed += interval
+            if elapsed >= timeout:
+                print(agent.SD_ERR + f"Timeout after about {timeout} seconds. Certificate not obtained for {names}.", file=sys.stderr)
+                obtained = False
+                break
             if has_acmejson_cert(names[0], names[1:]):
-                logcli_proc.terminate()
-                return True # certificate obtained successfully!
+                obtained = True # certificate obtained successfully!
+                break
             read_fds, _, _ = select.select([fdmon], [], [], 0) # 0 = non blocking
             if read_fds:
-                logcli_proc.terminate()
+                obtained = False
                 break # got some error messages from logcli.
-    return False
+        logcli_proc.terminate()
+    return obtained
 
 def add_default_certificate_name(main, sans=[]):
     """Add 'main' and 'sans' to the current certificate configuration. If
