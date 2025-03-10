@@ -65,7 +65,18 @@ def read_custom_cert_names():
 
 def remove_custom_cert(name):
     """Remove the custom/uploaded certificate files and its Traefik
-    configuration."""
+
+    configuration.
+
+    :param name: main name of the custom certificate (primary key)
+    :return: list of names certified by the removed certificate
+    """
+    try:
+        with open(f"custom_certificates/{name}.crt", 'rb') as f:
+            bcert = f.read()
+        old_names = list(extract_certified_names(bcert))
+    except FileNotFoundError:
+        old_names = [name]
     for path in [
         f"custom_certificates/{name}.crt",
         f"custom_certificates/{name}.key",
@@ -77,6 +88,7 @@ def remove_custom_cert(name):
             pass
     rdb = agent.redis_connect(privileged=True)
     rdb.delete(f'module/{os.environ["MODULE_ID"]}/certificate/{name}')
+    return old_names
 
 def has_acmejson_name(name):
     """Return True if name is found among acme.json Certificates."""

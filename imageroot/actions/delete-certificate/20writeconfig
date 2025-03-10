@@ -16,15 +16,18 @@ def main():
     tstart = datetime.datetime.now(datetime.UTC)
     request = json.load(sys.stdin)
     fqdn = request['fqdn']
+    changed_dns_names = {fqdn}
     if request['type'] == 'custom':
         if fqdn in cert_helpers.read_custom_cert_names():
-            cert_helpers.remove_custom_cert(fqdn)
+            old_names = cert_helpers.remove_custom_cert(fqdn)
+            changed_dns_names.update(set(old_names))
         else:
             exit_certificate_not_found_error(fqdn)
     elif request['type'] == 'internal':
         cur_names = cert_helpers.read_default_cert_names()
         if not fqdn in cur_names:
             exit_certificate_not_found_error(fqdn)
+        changed_dns_names.update(set(cur_names))
         new_names = list(filter(lambda x: x != fqdn, cur_names))
         if len(new_names) == 0:
             cert_helpers.remove_default_certificate_name(fqdn)
@@ -37,11 +40,20 @@ def main():
             sys.exit(3)
     else:
         sys.exit(4)
+    notify_certificate_changed_event(changed_dns_names)
 
 def exit_certificate_not_found_error(fqdn):
     agent.set_status('validation-failed')
     json.dump([{'field': 'fqdn','parameter':'fqdn','value': fqdn,'error':'certificate_not_found'}], fp=sys.stdout)
     sys.exit(2)
+
+def notify_certificate_changed_event(changed_dns_names):
+    rdb = agent.redis_connect(privileged=True)
+    rdb.publish(f"{os.environ['AGENT_ID']}/event/certificate-changed", json.dumps({
+        "node_id": int(os.environ['NODE_ID']),
+        "module_id": os.environ['MODULE_ID'],
+        "names": list(changed_dns_names),
+    }))
 
 if __name__ == "__main__":
     main()
