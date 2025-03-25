@@ -37,10 +37,10 @@ def main():
             acme_error = cert_helpers.traefik_last_acme_error_since(tstart)
             for errline in acme_error.split("\n"):
                 print(agent.SD_ERR + errline, file=sys.stderr)
+            json.dump(False, fp=sys.stdout)
             sys.exit(3)
-    else:
-        sys.exit(4)
     notify_certificate_changed_event(changed_dns_names)
+    json.dump(True, fp=sys.stdout)
 
 def exit_certificate_not_found_error(fqdn):
     agent.set_status('validation-failed')
